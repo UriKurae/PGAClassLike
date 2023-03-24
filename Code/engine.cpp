@@ -14,6 +14,22 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+u8 GlToShader(GLenum number)
+{
+    switch (number)
+    {
+    case GL_FLOAT_VEC3:
+        return 3;
+        break;
+    case GL_FLOAT_VEC2:
+        return 2;
+        break;
+
+    default:
+        assert("Not implemented yet!");
+    }
+}
+
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
     GLchar  infoLogBuffer[1024] = {};
@@ -102,6 +118,25 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
     program.filepath = filepath;
     program.programName = programName;
     program.lastWriteTimestamp = GetFileLastWriteTimestamp(filepath);
+   
+    GLint attributesCount = 0;
+    glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributesCount);
+    for (u32 i = 0; i < attributesCount; ++i)
+    {
+        char attributeName[90] = {};
+        GLsizei attributeSize = 0;
+        GLint size = 0;
+        GLenum type = 0;
+        glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeSize, &size, &type, attributeName);
+
+        u8 location = glGetAttribLocation(program.handle, attributeName);
+        
+        program.vertexInputLayout.attributes.push_back({ location, GlToShader(type)});
+        int hola = 0;
+        hola++;
+    }
+
+
     app->programs.push_back(program);
 
     return app->programs.size() - 1;
@@ -526,31 +561,18 @@ void Init(App* app)
 
     // Mesh Program
 
+    // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
     app->model = LoadModel(app, "Backpack/backpack.obj");
+    // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
+    // Get shader itself
     Program& shaderModel = app->programs[app->modelShaderID];
-    shaderModel.vertexInputLayout.attributes.push_back({ 0, 3 });
-    shaderModel.vertexInputLayout.attributes.push_back({ 1, 3 });
-    shaderModel.vertexInputLayout.attributes.push_back({ 2, 2 });
-    shaderModel.vertexInputLayout.attributes.push_back({ 3, 3 });
-    shaderModel.vertexInputLayout.attributes.push_back({ 4, 3 });
-   
+    
+    // Load model texture and get texture ID from the vectors of textures.
+    app->modelTexture = LoadTexture2D(app, "Backpack/diffuse.jpg");
+    // Get uniform location from the texture for later use
     app->modelShaderTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "uTexture");
     
-    
-    
-    GLint hola = 0;
-    glGetProgramiv(app->modelShaderID, GL_ACTIVE_ATTRIBUTES, &hola);
-
-    char test[25] = {};
-    GLsizei attributeSize = 0;
-    GLint sise = 0;
-    GLenum type = 0;
-    glGetActiveAttrib(app->modelShaderID, 0, ARRAY_COUNT(test), &attributeSize, &sise, &type, test);
-
-
-   u32 teste = glGetAttribLocation(app->modelShaderID, test);
-  
 
     // End Mesh Program
 
@@ -650,28 +672,24 @@ void Render(App* app)
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
-            Program& texturedMeshProgram = app->programs[app->texturedGeometryProgramIdx];
-            glUseProgram(texturedMeshProgram.handle);
+            Program& shaderModel = app->programs[app->modelShaderID];
+            glUseProgram(shaderModel.handle);
 
             Model& model = app->models[app->model];
             Mesh& mesh = app->meshes[model.meshIdx];
 
             for (u32 i = 0; i < mesh.submeshes.size(); ++i)
             {
-                u32 vao = FindVao(mesh, i, texturedMeshProgram);
+                u32 vao = FindVao(mesh, i, shaderModel);
                 glBindVertexArray(vao);
 
                 u32 submeshMaterialIdx = model.materialIdx[i];
                 Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-                //glActiveTexture(GL_TEXTURE0);
-                //glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-                //glUniform1i(app->texturedMeshProgram_uTexture, 0);
                 glUniform1i(app->modelShaderTextureUniformLocation, 0);
                 glActiveTexture(GL_TEXTURE0);
-                GLuint textureHandle = app->textures[app->diceTexIdx].handle;
+                GLuint textureHandle = app->textures[app->modelTexture].handle;
                 glBindTexture(GL_TEXTURE_2D, textureHandle);
-
 
                 Submesh& submesh = mesh.submeshes[i];
                 glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);

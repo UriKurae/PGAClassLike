@@ -100,6 +100,7 @@ struct App
     u32 model;
     u32 modelShaderID;
     u32 modelShaderTextureUniformLocation;
+    u32 modelTexture;
 
 
     // program indices
