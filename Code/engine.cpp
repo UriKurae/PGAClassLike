@@ -616,7 +616,7 @@ void Gui(App* app)
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
     ImGui::End();
 
-    ImGui::Begin("Info");
+    ImGui::Begin("Camera Info");
     ImGui::Text("Cam Pos: %f, %f, %f", app->camera->GetPosition().x, app->camera->GetPosition().y, app->camera->GetPosition().z);
     ImGui::End();
 
@@ -690,8 +690,8 @@ void Render(App* app)
                 glUseProgram(programTexturedGeometry.handle);
                 glBindVertexArray(app->vao);
 
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                //glEnable(GL_BLEND);
+                //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
                 glUniform1i(app->programUniformTexture, 0);
                 glActiveTexture(GL_TEXTURE0);
@@ -708,7 +708,8 @@ void Render(App* app)
         {
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDisable(GL_BLEND);
+            //glDisable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
