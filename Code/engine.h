@@ -7,6 +7,7 @@
 #include "platform.h"
 #include <glad/glad.h>
 #include "Models.h"
+#include "Camera.h"
 
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
@@ -88,6 +89,9 @@ struct App
 
     ivec2 displaySize;
 
+    // Camera
+    std::shared_ptr<EditorCamera> camera;
+
 
     // Meshes and materials
     std::vector<Texture>  textures;
@@ -102,6 +106,10 @@ struct App
     u32 modelShaderTextureUniformLocation;
     u32 modelTexture;
 
+    // Uniform buffers
+    u32 bufferHandle;
+    i32 maxUniformBufferSize;
+    i32 uniformBlockAlignment;
 
     // program indices
     u32 texturedGeometryProgramIdx;

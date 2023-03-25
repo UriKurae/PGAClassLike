@@ -9,8 +9,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <string>
@@ -106,4 +108,6 @@ LogString(logBuffer);             \
 
 #define PI  3.14159265359f
 #define TAU 6.28318530718f
+
+#define BINDING(b) b
 

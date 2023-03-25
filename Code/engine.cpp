@@ -519,6 +519,24 @@ void Init(App* app)
     // - vaos
     // - programs (and retrieve uniform indices)
     // - textures
+    
+    app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
+
+    // Get max uniform size allowed for uniform buffers
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
+
+    // Generate uniform buffers
+    glGenBuffers(1, &app->bufferHandle);
+    glBindBuffer(GL_UNIFORM_BUFFER, app->bufferHandle);
+    glBufferData(GL_UNIFORM_BUFFER, app->maxUniformBufferSize, NULL, GL_STREAM_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    // Bind buffer handle
+    u32 blockOffset = 0;
+    u32 blockSize = sizeof(glm::mat4) * 2;
+    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->bufferHandle, blockOffset, blockSize);
+
 
 #pragma region Dices
             // Prepare vertex buffer
@@ -598,6 +616,10 @@ void Gui(App* app)
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
     ImGui::End();
 
+    ImGui::Begin("Info");
+    ImGui::Text("Cam Pos: %f, %f, %f", app->camera->GetPosition().x, app->camera->GetPosition().y, app->camera->GetPosition().z);
+    ImGui::End();
+
     // TODO: Uncomment for OpenGL info.
     //ImGui::OpenPopup("OpenGL Info");
     if (ImGui::BeginPopup("OpenGL Info"))
@@ -624,6 +646,23 @@ void Gui(App* app)
 void Update(App* app)
 {
     // You can handle app->input keyboard/mouse here
+    app->camera->Update(app->input, app->deltaTime);
+
+    // ------ Update Buffer Uniforms -------
+    glBindBuffer(GL_UNIFORM_BUFFER, app->bufferHandle);
+    u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    u32 bufferHead = 0;
+
+    memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0)), sizeof(glm::mat4));
+    bufferHead += sizeof(glm::mat4);
+    glm::mat4 test= app->camera->GetView();
+    memcpy(bufferData + bufferHead, glm::value_ptr(app->camera->GetViewProjection()), sizeof(glm::mat4));
+    bufferHead += sizeof(glm::mat4);
+
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    // ------ Update Buffer Uniforms End -------
 }
 
 void Render(App* app)
@@ -669,6 +708,7 @@ void Render(App* app)
         {
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_BLEND);
 
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
