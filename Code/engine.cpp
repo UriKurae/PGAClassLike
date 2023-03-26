@@ -581,6 +581,12 @@ void Init(App* app)
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
     app->model = LoadModel(app, "Backpack/backpack.obj");
+    
+    Entity ent = {};
+    ent.PushEntity(app->model);
+    
+    app->entities.push_back(ent);
+
     // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
     // Get shader itself
@@ -653,12 +659,19 @@ void Update(App* app)
     u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
     u32 bufferHead = 0;
 
-    memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0)), sizeof(glm::mat4));
-    bufferHead += sizeof(glm::mat4);
-    glm::mat4 test= app->camera->GetView();
-    memcpy(bufferData + bufferHead, glm::value_ptr(app->camera->GetViewProjection()), sizeof(glm::mat4));
-    bufferHead += sizeof(glm::mat4);
+    for (u32 i = 0; i < app->entities.size(); ++i)
+    {
+        app->entities[i].localParamsOffset = bufferHead;
 
+        memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0)), sizeof(glm::mat4));
+        bufferHead += sizeof(glm::mat4);
+        glm::mat4 test = app->camera->GetView();
+        memcpy(bufferData + bufferHead, glm::value_ptr(app->camera->GetViewProjection()), sizeof(glm::mat4));
+        bufferHead += sizeof(glm::mat4);
+
+        app->entities[i].localParamsSize = bufferHead - app->entities[i].localParamsOffset;
+    }
+    
     glUnmapBuffer(GL_UNIFORM_BUFFER);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -743,4 +756,6 @@ void Render(App* app)
         default:;
     }
 }
+
+
 

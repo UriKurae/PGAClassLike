@@ -38,3 +38,17 @@ struct Material
 	u32 normalsTextureIdx;
 	u32 bumpTextureIdx;
 };
+
+struct Entity
+{
+	void PushEntity(u32 modelID)
+	{
+		worldMatrix = glm::mat4(1.0f);
+		modelIndex = modelID;
+	}
+
+	glm::mat4 worldMatrix;
+	u32 modelIndex;
+	u32 localParamsOffset;
+	u32 localParamsSize;
+};

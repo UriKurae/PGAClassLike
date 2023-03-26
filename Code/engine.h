@@ -106,6 +106,9 @@ struct App
     u32 modelShaderTextureUniformLocation;
     u32 modelTexture;
 
+    // Entities
+    std::vector<Entity> entities;
+
     // Uniform buffers
     u32 bufferHandle;
     i32 maxUniformBufferSize;
