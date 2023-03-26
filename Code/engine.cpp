@@ -14,21 +14,37 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-u8 GlToShader(GLenum number)
-{
-    switch (number)
-    {
-    case GL_FLOAT_VEC3:
-        return 3;
-        break;
-    case GL_FLOAT_VEC2:
-        return 2;
-        break;
 
-    default:
-        assert("Not implemented yet!");
+namespace Utils
+{
+    bool IsPowerOf2(u32 value)
+    {
+        return value && !(value & (value - 1));
+    }
+
+    u32 Align(u32 value, u32 alignment)
+    {
+        return (value + alignment - 1) & ~(alignment - 1);
+    }
+
+    u8 GlToShader(GLenum number)
+    {
+        switch (number)
+        {
+        case GL_FLOAT_VEC3:
+            return 3;
+            break;
+        case GL_FLOAT_VEC2:
+            return 2;
+            break;
+
+        default:
+            assert("Not implemented yet!");
+        }
     }
 }
+
+
 
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
@@ -131,7 +147,7 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
 
         u8 location = glGetAttribLocation(program.handle, attributeName);
         
-        program.vertexInputLayout.attributes.push_back({ location, GlToShader(type)});
+        program.vertexInputLayout.attributes.push_back({ location, Utils::GlToShader(type)});
         int hola = 0;
         hola++;
     }
@@ -581,11 +597,28 @@ void Init(App* app)
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
     app->model = LoadModel(app, "Backpack/backpack.obj");
+    u32 model2 = LoadModel(app, "Backpack/sphere.fbx");
     
+    
+
+    Entity ent2 = {};
+    ent2.PushEntity(model2);
+    ent2.position = vec3(1.0f);
+    ent2.scale = vec3(1.0f);
+    ent2.rotation = vec3(0.0f);
+    app->entities.push_back(ent2);
+
     Entity ent = {};
+    ent.position = vec3(2.0f);
+    ent.scale = vec3(1.0f);
+    ent.rotation = vec3(0.0f);
     ent.PushEntity(app->model);
-    
     app->entities.push_back(ent);
+
+    
+
+    
+    
 
     // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
@@ -626,6 +659,12 @@ void Gui(App* app)
     ImGui::Text("Cam Pos: %f, %f, %f", app->camera->GetPosition().x, app->camera->GetPosition().y, app->camera->GetPosition().z);
     ImGui::End();
 
+    for (u32 i = 0; i < app->entities.size(); ++i)
+    {
+        ImGui::Begin("Entities Info");
+        ImGui::Text("Pos: %f, %f, %f", app->entities[i].worldMatrix[3].x, app->entities[i].worldMatrix[3].y, app->entities[i].worldMatrix[3].z);
+        ImGui::End();
+    }
     // TODO: Uncomment for OpenGL info.
     //ImGui::OpenPopup("OpenGL Info");
     if (ImGui::BeginPopup("OpenGL Info"))
@@ -661,12 +700,13 @@ void Update(App* app)
 
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
+        bufferHead = Utils::Align(bufferHead, app->uniformBlockAlignment);
         app->entities[i].localParamsOffset = bufferHead;
 
-        memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0)), sizeof(glm::mat4));
+        memcpy(bufferData + bufferHead, glm::value_ptr(app->entities[i].GetTransform()), sizeof(glm::mat4));
         bufferHead += sizeof(glm::mat4);
-        glm::mat4 test = app->camera->GetView();
-        memcpy(bufferData + bufferHead, glm::value_ptr(app->camera->GetViewProjection()), sizeof(glm::mat4));
+        
+        memcpy(bufferData + bufferHead, glm::value_ptr(app->camera->GetViewProjection() * app->entities[i].GetTransform()), sizeof(glm::mat4));
         bufferHead += sizeof(glm::mat4);
 
         app->entities[i].localParamsSize = bufferHead - app->entities[i].localParamsOffset;
@@ -729,26 +769,30 @@ void Render(App* app)
             Program& shaderModel = app->programs[app->modelShaderID];
             glUseProgram(shaderModel.handle);
 
-            Model& model = app->models[app->model];
-            Mesh& mesh = app->meshes[model.meshIdx];
-
-            for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+            for (u32 i = 0; i < app->models.size(); ++i)
             {
-                u32 vao = FindVao(mesh, i, shaderModel);
-                glBindVertexArray(vao);
+                Model& model = app->models[i];
+                Mesh& mesh = app->meshes[model.meshIdx];
 
-                u32 submeshMaterialIdx = model.materialIdx[i];
-                Material& submeshMaterial = app->materials[submeshMaterialIdx];
+                for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+                {
+                    u32 vao = FindVao(mesh, j, shaderModel);
+                    glBindVertexArray(vao);
 
-                glUniform1i(app->modelShaderTextureUniformLocation, 0);
-                glActiveTexture(GL_TEXTURE0);
-                GLuint textureHandle = app->textures[app->modelTexture].handle;
-                glBindTexture(GL_TEXTURE_2D, textureHandle);
+                    u32 submeshMaterialIdx = model.materialIdx[j];
+                    Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-                Submesh& submesh = mesh.submeshes[i];
-                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-                glBindVertexArray(0);
+                    glUniform1i(app->modelShaderTextureUniformLocation, 0);
+                    glActiveTexture(GL_TEXTURE0);
+                    GLuint textureHandle = app->textures[app->modelTexture].handle;
+                    glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+                    Submesh& submesh = mesh.submeshes[j];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                    glBindVertexArray(0);
+                }
             }
+           
             glUseProgram(0);
         }
             break;

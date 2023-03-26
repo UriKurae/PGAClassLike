@@ -47,8 +47,23 @@ struct Entity
 		modelIndex = modelID;
 	}
 
+	glm::mat4 GetTransform() const
+	{
+		glm::mat4 rot = glm::rotate(glm::mat4(1.0f), rotation.x, { 1.0f, 0.0f, 0.0f }) *
+			glm::rotate(glm::mat4(1.0f), rotation.y, { 0.0f, 1.0f, 0.0f }) *
+			glm::rotate(glm::mat4(1.0f), rotation.z, { 0.0f, 0.0f, 1.0f });
+
+		return glm::translate(glm::mat4(1.0f), position) *
+			rot *
+			glm::scale(glm::mat4(1.0f), scale);
+	}
+
 	glm::mat4 worldMatrix;
 	u32 modelIndex;
 	u32 localParamsOffset;
 	u32 localParamsSize;
+
+	glm::vec3 position;
+	glm::vec3 rotation;
+	glm::vec3 scale;
 };
