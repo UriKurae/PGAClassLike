@@ -597,29 +597,32 @@ void Init(App* app)
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
     app->model = LoadModel(app, "Backpack/backpack.obj");
-    u32 model2 = LoadModel(app, "Backpack/sphere.fbx");
+    u32 model2 = LoadModel(app, "Backpack/backpack.obj");
+    u32 model3 = LoadModel(app, "Backpack/backpack.obj");
     
     
-
-    Entity ent2 = {};
-    ent2.PushEntity(model2);
-    ent2.position = vec3(1.0f);
-    ent2.scale = vec3(1.0f);
-    ent2.rotation = vec3(0.0f);
-    app->entities.push_back(ent2);
-
     Entity ent = {};
-    ent.position = vec3(2.0f);
+    ent.position = vec3(0.0f);
     ent.scale = vec3(1.0f);
     ent.rotation = vec3(0.0f);
     ent.PushEntity(app->model);
     app->entities.push_back(ent);
 
-    
+    Entity ent2 = {};
+    ent2.PushEntity(model2);
+    ent2.position = vec3(4.0f, 0.0f, 0.0f);
+    ent2.scale = vec3(1.0f);
+    ent2.rotation = vec3(0.0f);
+    app->entities.push_back(ent2);
+
+    Entity ent3 = {};
+    ent3.PushEntity(model3);
+    ent3.position = vec3(-4.0f, 0.0f, 0.0f);
+    ent3.scale = vec3(1.0f);
+    ent3.rotation = vec3(0.0f);
+    app->entities.push_back(ent3);
 
     
-    
-
     // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
     // Get shader itself
@@ -662,7 +665,48 @@ void Gui(App* app)
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
         ImGui::Begin("Entities Info");
-        ImGui::Text("Pos: %f, %f, %f", app->entities[i].worldMatrix[3].x, app->entities[i].worldMatrix[3].y, app->entities[i].worldMatrix[3].z);
+        ImGui::PushID(i);
+        glm::vec3& position = app->entities[i].position;
+        glm::vec3& scale = app->entities[i].scale;
+        glm::vec3& rotation = app->entities[i].rotation;
+        
+        ImGui::Text("Pos:");
+        float windowWidth = ImGui::GetContentRegionAvailWidth();
+        ImGui::PushItemWidth(50.0f);
+        ImGui::SameLine();
+        ImGui::DragFloat("##PosX", &position.x, 0.1f);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##PosY", &position.y, 0.1f);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##PosZ", &position.z, 0.1f);
+
+        ImGui::Text("rotation:");
+        ImGui::SameLine();
+        ImGui::DragFloat("##rotation", &rotation.x, 0.1f);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##rotation", &rotation.y, 0.1f);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##rotation", &rotation.z, 0.1f);
+
+
+        ImGui::Text("Scale:");
+        ImGui::SameLine();
+        ImGui::DragFloat("##scaleX", &scale.x, 0.1f);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##scaleY", &scale.y, 0.1f);
+
+        ImGui::SameLine();
+        ImGui::DragFloat("##scaleZ", &scale.z, 0.1f);
+
+        ImGui::PopItemWidth();
+
+        ImGui::PopID();
+        //ImGui::Text("Pos: %f, %f, %f", position.x, position.y, position.z);
         ImGui::End();
     }
     // TODO: Uncomment for OpenGL info.
@@ -771,6 +815,11 @@ void Render(App* app)
 
             for (u32 i = 0; i < app->models.size(); ++i)
             {
+                // Bind buffer handle
+                u32 blockOffset = 0;
+                u32 blockSize = sizeof(glm::mat4) * 2;
+                glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->bufferHandle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
+
                 Model& model = app->models[i];
                 Mesh& mesh = app->meshes[model.meshIdx];
 
@@ -778,6 +827,7 @@ void Render(App* app)
                 {
                     u32 vao = FindVao(mesh, j, shaderModel);
                     glBindVertexArray(vao);
+
 
                     u32 submeshMaterialIdx = model.materialIdx[j];
                     Material& submeshMaterial = app->materials[submeshMaterialIdx];
