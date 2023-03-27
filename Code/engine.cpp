@@ -635,7 +635,6 @@ void Init(App* app)
 
     // End Mesh Program
 
-
     app->glInfo.glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     app->glInfo.glRender = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
     app->glInfo.glVendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
@@ -665,9 +664,10 @@ void Gui(App* app)
     {
         ImGui::Begin("Entities Info");
         ImGui::PushID(i);
+        ImGui::Text("Entity %d", i);
         glm::vec3& position = app->entities[i].position;
         glm::vec3& scale = app->entities[i].scale;
-        
+       
         ImGui::Text("Pos:");
         float windowWidth = ImGui::GetContentRegionAvailWidth();
         ImGui::PushItemWidth(50.0f);
@@ -680,7 +680,8 @@ void Gui(App* app)
         ImGui::SameLine();
         ImGui::DragFloat("##PosZ", &position.z, 0.1f);
 
-        ImGui::Text("rotation:");
+
+        ImGui::Text("Rot:");
         glm::vec3 rotation = app->entities[i].rotation;
         rotation = TOANGLE(rotation);
         ImGui::SameLine();
@@ -693,7 +694,8 @@ void Gui(App* app)
         ImGui::DragFloat("##rotationZ", &rotation.z, 0.1f);
         app->entities[i].rotation = TORADIANS(rotation);
 
-        ImGui::Text("Scale:");
+       
+        ImGui::Text("Sca:");
         ImGui::SameLine();
         ImGui::DragFloat("##scaleX", &scale.x, 0.1f);
 
@@ -705,8 +707,11 @@ void Gui(App* app)
 
         ImGui::PopItemWidth();
 
+        ImGui::Separator();
+
+
         ImGui::PopID();
-        //ImGui::Text("Pos: %f, %f, %f", position.x, position.y, position.z);
+        
         ImGui::End();
     }
     // TODO: Uncomment for OpenGL info.
