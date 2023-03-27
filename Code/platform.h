@@ -109,5 +109,8 @@ LogString(logBuffer);             \
 #define PI  3.14159265359f
 #define TAU 6.28318530718f
 
+#define TORADIANS(a) (a * PI / 180.0f)
+#define TOANGLE(a) (a / (180.0 * PI))
+
 #define BINDING(b) b
 

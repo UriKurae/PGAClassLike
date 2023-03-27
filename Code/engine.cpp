@@ -148,8 +148,7 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
         u8 location = glGetAttribLocation(program.handle, attributeName);
         
         program.vertexInputLayout.attributes.push_back({ location, Utils::GlToShader(type)});
-        int hola = 0;
-        hola++;
+
     }
 
 
@@ -596,9 +595,9 @@ void Init(App* app)
     // Mesh Program
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
-    app->model = LoadModel(app, "Backpack/backpack.obj");
-    u32 model2 = LoadModel(app, "Backpack/backpack.obj");
-    u32 model3 = LoadModel(app, "Backpack/backpack.obj");
+    app->model = LoadModel(app, "backpack/backpack.obj");
+    u32 model2 = LoadModel(app, "backpack/backpack.obj");
+    u32 model3 = LoadModel(app, "backpack/backpack.obj");
     
     
     Entity ent = {};
@@ -649,7 +648,7 @@ void Init(App* app)
         app->glInfo.glExtensions.push_back(reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, GLuint(i))));
     }
 
-    app->mode = Mode_Count;
+    app->mode = Mode::Mode_Count;
 }
 
 void Gui(App* app)
@@ -668,7 +667,6 @@ void Gui(App* app)
         ImGui::PushID(i);
         glm::vec3& position = app->entities[i].position;
         glm::vec3& scale = app->entities[i].scale;
-        glm::vec3& rotation = app->entities[i].rotation;
         
         ImGui::Text("Pos:");
         float windowWidth = ImGui::GetContentRegionAvailWidth();
@@ -683,15 +681,17 @@ void Gui(App* app)
         ImGui::DragFloat("##PosZ", &position.z, 0.1f);
 
         ImGui::Text("rotation:");
+        glm::vec3 rotation = app->entities[i].rotation;
+        rotation = TORADIANS(rotation);
         ImGui::SameLine();
-        ImGui::DragFloat("##rotation", &rotation.x, 0.1f);
+        ImGui::DragFloat("##rotationX", &rotation.x, 0.1f);
 
         ImGui::SameLine();
-        ImGui::DragFloat("##rotation", &rotation.y, 0.1f);
+        ImGui::DragFloat("##rotationY", &rotation.y, 0.1f);
 
         ImGui::SameLine();
-        ImGui::DragFloat("##rotation", &rotation.z, 0.1f);
-
+        ImGui::DragFloat("##rotationZ", &rotation.z, 0.1f);
+        app->entities[i].rotation = TOANGLE(rotation);
 
         ImGui::Text("Scale:");
         ImGui::SameLine();
@@ -766,7 +766,7 @@ void Render(App* app)
 {
     switch (app->mode)
     {
-        case Mode_TexturedQuad:
+        case Mode::Mode_TexturedQuad:
             {
                 // TODO: Draw your textured quad here!
                 // - clear the framebuffer
@@ -801,7 +801,7 @@ void Render(App* app)
                 glUseProgram(0);
             }
             break;
-        case Mode_Count:
+        case Mode::Mode_Count:
         {
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

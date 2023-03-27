@@ -39,7 +39,7 @@ struct Program
     VertexShaderLayout vertexInputLayout;
 };
 
-enum Mode
+enum class Mode
 {
     Mode_TexturedQuad,
     Mode_Count
