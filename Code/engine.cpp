@@ -595,9 +595,9 @@ void Init(App* app)
     // Mesh Program
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
-    app->model = LoadModel(app, "backpack/backpack.obj");
-    u32 model2 = LoadModel(app, "backpack/backpack.obj");
-    u32 model3 = LoadModel(app, "backpack/backpack.obj");
+    app->model = LoadModel(app, "Backpack/backpack.obj");
+    u32 model2 = LoadModel(app, "Backpack/backpack.obj");
+    u32 model3 = LoadModel(app, "Backpack/backpack.obj");
     
     
     Entity ent = {};
@@ -813,14 +813,14 @@ void Render(App* app)
             Program& shaderModel = app->programs[app->modelShaderID];
             glUseProgram(shaderModel.handle);
 
-            for (u32 i = 0; i < app->models.size(); ++i)
+            for (u32 i = 0; i < app->entities.size(); ++i)
             {
                 // Bind buffer handle
                 u32 blockOffset = 0;
                 u32 blockSize = sizeof(glm::mat4) * 2;
                 glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->bufferHandle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
 
-                Model& model = app->models[i];
+                Model& model = app->models[app->entities[i].modelIndex];
                 Mesh& mesh = app->meshes[model.meshIdx];
 
                 for (u32 j = 0; j < mesh.submeshes.size(); ++j)
