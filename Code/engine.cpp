@@ -682,7 +682,7 @@ void Gui(App* app)
 
         ImGui::Text("rotation:");
         glm::vec3 rotation = app->entities[i].rotation;
-        rotation = TORADIANS(rotation);
+        rotation = TOANGLE(rotation);
         ImGui::SameLine();
         ImGui::DragFloat("##rotationX", &rotation.x, 0.1f);
 
@@ -691,7 +691,7 @@ void Gui(App* app)
 
         ImGui::SameLine();
         ImGui::DragFloat("##rotationZ", &rotation.z, 0.1f);
-        app->entities[i].rotation = TOANGLE(rotation);
+        app->entities[i].rotation = TORADIANS(rotation);
 
         ImGui::Text("Scale:");
         ImGui::SameLine();
