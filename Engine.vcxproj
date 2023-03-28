@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Code\Camera.cpp" />
     <ClCompile Include="Code\engine.cpp" />
+    <ClCompile Include="Code\FrameBuffer.cpp" />
     <ClCompile Include="Code\platform.cpp" />
     <ClCompile Include="ThirdParty\glad\include\glad\glad.c" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp" />
@@ -36,6 +37,7 @@
     <ClInclude Include="Code\Camera.h" />
     <ClInclude Include="Code\Buffers.h" />
     <ClInclude Include="Code\engine.h" />
+    <ClInclude Include="Code\FrameBuffer.h" />
     <ClInclude Include="Code\platform.h" />
     <ClInclude Include="Code\Models.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />
@@ -54,6 +56,7 @@
     <None Include="Code\BufferUtilities.h" />
     <None Include="Code\Lights.h" />
     <None Include="WorkingDir\meshShader.glsl" />
+    <None Include="WorkingDir\quadFrameBuffer.glsl" />
     <None Include="WorkingDir\shaders.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

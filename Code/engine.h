@@ -8,6 +8,7 @@
 #include "Models.h"
 #include "Lights.h"
 #include "Camera.h"
+#include "FrameBuffer.h"
 
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
@@ -84,7 +85,16 @@ const u16 indices[] =
     0, 2, 3
 };
 
+const float quadVertices[]
+{
+    -1.0f,  1.0f,  0.0f, 1.0f,
+    -1.0f, -1.0f,  0.0f, 0.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
 
+    -1.0f,  1.0f,  0.0f, 1.0f,
+     1.0f, -1.0f,  1.0f, 0.0f,
+     1.0f,  1.0f,  1.0f, 1.0f
+};
 
 struct App
 {
@@ -104,6 +114,13 @@ struct App
     // Camera
     std::shared_ptr<EditorCamera> camera;
 
+    // Framebuffer
+    std::shared_ptr<FrameBuffer> framebuffer;
+
+    // Framebuffer image shader
+    u32 quadFBshader;
+    u32 quadVao;
+    u32 quadVbo;
 
     // Meshes and materials
     std::vector<Texture>  textures;
@@ -174,3 +191,6 @@ void Render(App* app);
 void RenderModels(App* app, Program shaderModel);
 void RenderLights(App* app, Program shaderModel);
 
+void GenerateQuadVao(App* app);
+
+void DrawQuadVao(App* app);

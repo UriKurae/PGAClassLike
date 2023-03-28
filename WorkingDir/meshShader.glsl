@@ -62,8 +62,6 @@ void main()
 {
 	vec4 textureColor = texture(uTexture, vTexCoord);
 
-	
-
 	for (int i = 0; i < uLightCount; ++i)
 	{
 		vec3 lightDir = normalize(uLight[i].direction);

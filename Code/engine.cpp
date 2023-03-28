@@ -594,8 +594,14 @@ void Init(App* app)
     // - vaos
     // - programs (and retrieve uniform indices)
     // - textures
+
+    GenerateQuadVao(app);
+
+    app->quadFBshader = LoadProgram(app, "quadFrameBuffer.glsl", "QUAD_FRAMEBUFFER");
     
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
+
+    app->framebuffer = std::make_shared<FrameBuffer>(app->displaySize);
 
     // Get max uniform size allowed for uniform buffers
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
@@ -922,12 +928,20 @@ void Render(App* app)
             break;
         case Mode::Mode_Count:
         {
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            //glDisable(GL_BLEND);
-            glEnable(GL_DEPTH_TEST);
-
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+            // First pass
+            // Bind Custom framebuffer
+            app->framebuffer->Bind();
+            
+            // Specify which color attachments to draw to
+            GLuint attachments[] = {  app->framebuffer->depthAttachmentId };
+            //app->framebuffer->DrawAttachments(1, attachments);
+            glDrawBuffers(2, attachments);
+            
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             Program& shaderModel = app->programs[app->modelShaderID];
             glUseProgram(shaderModel.handle);
@@ -936,6 +950,25 @@ void Render(App* app)
             RenderModels(app, shaderModel);
            
             glUseProgram(0);
+            app->framebuffer->Unbind();
+
+            glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            Program& quadShader = app->programs[app->quadFBshader];
+            glUseProgram(quadShader.handle);
+
+            u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
+            glUniform1i(colorLocation, 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
+            
+
+            glDisable(GL_DEPTH_TEST);
+            DrawQuadVao(app);
+
+            glUseProgram(0);      
+            
         }
             break;
 
@@ -977,4 +1010,28 @@ void RenderLights(App* app, Program shaderModel)
 {
     // Bind buffer handle
     glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+}
+
+void GenerateQuadVao(App* app)
+{
+    glGenVertexArrays(1, &app->quadVao);
+    glGenBuffers(1, &app->quadVbo);
+   
+    glBindVertexArray(app->quadVao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, app->quadVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    glBindVertexArray(0);
+}
+
+void DrawQuadVao(App* app)
+{
+    glBindVertexArray(app->quadVao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 }
