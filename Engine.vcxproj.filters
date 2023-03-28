@@ -110,5 +110,7 @@
     <None Include="WorkingDir\meshShader.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Code\BufferUtilities.h" />
+    <None Include="Code\Lights.h" />
   </ItemGroup>
 </Project>

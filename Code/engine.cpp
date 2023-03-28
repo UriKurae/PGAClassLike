@@ -13,19 +13,76 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "BufferUtilities.h"
+
+#define CreateConstantBuffer(size) CreateBuffer(size, GL_UNIFORM_BUFFER, GL_STREAM_DRAW)
+#define CreateStaticVertexBuffer(size) CreateBuffer(size, GL_ARRAY_BUFFER, GL_STATIC_DRAW)
+#define CreateStaticIndexBuffer(size) CreateBuffer(size, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW)
+#define PushData(buffer, data, size) PushAlignedData(buffer, data, size, 1)
+#define PushUInt(buffer, value) { u32 v = value; PushAlignedData(buffer, &v, sizeof(v), 4); }
+#define PushVec3(buffer, value) PushAlignedData(buffer, value_ptr(value), sizeof(value), sizeof(glm::vec4))
+#define PushVec4(buffer, value) PushAlignedData(buffer, value_ptr(value), sizeof(value), sizeof(glm::vec4))
+#define PushMat3(buffer, value) PushAlignedData(buffer, value_ptr(value), sizeof(value), sizeof(glm::vec4))
+#define PushMat4(buffer, value) PushAlignedData(buffer, value_ptr(value), sizeof(value), sizeof(glm::vec4))
 
 
+
+bool IsPowerOf2(u32 value)
+{
+    return value && !(value & (value - 1));
+}
+
+u32 Align(u32 value, u32 alignment)
+{
+    return (value + alignment - 1) & ~(alignment - 1);
+}
+Buffer CreateBuffer(u32 size, GLenum type, GLenum usage)
+{
+    Buffer buffer = {};
+    buffer.size = size;
+    buffer.type = type;
+
+    glGenBuffers(1, &buffer.handle);
+    glBindBuffer(type, buffer.handle);
+    glBufferData(type, buffer.size, NULL, usage);
+    glBindBuffer(type, 0);
+
+    return buffer;
+}
+
+void BindBuffer(const Buffer& buffer)
+{
+    glBindBuffer(buffer.type, buffer.handle);
+}
+
+void MapBuffer(Buffer& buffer, GLenum access)
+{
+    glBindBuffer(buffer.type, buffer.handle);
+    buffer.data = (u8*)glMapBuffer(buffer.type, access);
+    buffer.head = 0;
+}
+
+void UnmapBuffer(Buffer& buffer)
+{
+    glUnmapBuffer(buffer.type);
+    glBindBuffer(buffer.type, 0);
+}
+
+void AlignHead(Buffer& buffer, u32 alignment)
+{
+    ASSERT(IsPowerOf2(alignment), "The alignment must be a power of 2");
+    buffer.head = Align(buffer.head, alignment);
+}
+
+void PushAlignedData(Buffer& buffer, const void* data, u32 size, u32 alignment)
+{
+    ASSERT(buffer.data != NULL, "The buffer must be mapped first");
+    AlignHead(buffer, alignment);
+    memcpy((u8*)buffer.data + buffer.head, data, size);
+    buffer.head += size;
+}
 namespace Utils
 {
-    bool IsPowerOf2(u32 value)
-    {
-        return value && !(value & (value - 1));
-    }
-
-    u32 Align(u32 value, u32 alignment)
-    {
-        return (value + alignment - 1) & ~(alignment - 1);
-    }
 
     u8 GlToShader(GLenum number)
     {
@@ -92,6 +149,8 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
     {
         glGetShaderInfoLog(vshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
         ELOG("glCompileShader() failed with vertex shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        assert(success);
+      
     }
 
     GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -102,6 +161,7 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
     {
         glGetShaderInfoLog(fshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
         ELOG("glCompileShader() failed with fragment shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        assert(success);
     }
 
     GLuint programHandle = glCreateProgram();
@@ -540,17 +600,11 @@ void Init(App* app)
     // Get max uniform size allowed for uniform buffers
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
+    
+    // Bind buffer handle   
+    app->uniformBuffer = CreateBuffer(app->maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STATIC_DRAW);
+    app->globalParamsOffset = app->uniformBuffer.head;
 
-    // Generate uniform buffers
-    glGenBuffers(1, &app->bufferHandle);
-    glBindBuffer(GL_UNIFORM_BUFFER, app->bufferHandle);
-    glBufferData(GL_UNIFORM_BUFFER, app->maxUniformBufferSize, NULL, GL_STREAM_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    // Bind buffer handle
-    u32 blockOffset = 0;
-    u32 blockSize = sizeof(glm::mat4) * 2;
-    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->bufferHandle, blockOffset, blockSize);
 
 
 #pragma region Dices
@@ -591,6 +645,26 @@ void Init(App* app)
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 #pragma endregion
      
+    // Lights
+    Light light;
+    light.type = LightType::LightType_Point;
+    light.position = glm::vec3(0.0f, 2.0f, 0.0f);
+    light.direction = glm::vec3(0.0f);
+    light.color = glm::vec3(1.0f, 1.0f, 0.0f);
+
+    app->lights.push_back(light);
+
+    Light light2;
+    light2.type = LightType::LightType_Point;
+    light2.position = glm::vec3(0.0f, 2.0f, 0.0f);
+    light2.direction = glm::vec3(0.0f);
+    light2.color = glm::vec3(1.0f, 0.0f, 1.0f);
+
+    app->lights.push_back(light2);
+
+
+    // End Lights
+
 
     // Mesh Program
 
@@ -626,13 +700,12 @@ void Init(App* app)
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
     // Get shader itself
     Program& shaderModel = app->programs[app->modelShaderID];
-    
+ 
     // Load model texture and get texture ID from the vectors of textures.
     app->modelTexture = LoadTexture2D(app, "Backpack/diffuse.jpg");
     // Get uniform location from the texture for later use
     app->modelShaderTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "uTexture");
     
-
     // End Mesh Program
 
     app->glInfo.glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -739,32 +812,54 @@ void Gui(App* app)
 
 void Update(App* app)
 {
-    // You can handle app->input keyboard/mouse here
+    // Update Camera
     app->camera->Update(app->input, app->deltaTime);
 
-    // ------ Update Buffer Uniforms -------
-    glBindBuffer(GL_UNIFORM_BUFFER, app->bufferHandle);
-    u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    u32 bufferHead = 0;
+    // ------ Update uniform buffer lights -------
+    MapBuffer(app->uniformBuffer, GL_WRITE_ONLY);
+
+    app->globalParamsOffset = app->uniformBuffer.head;
+
+    PushVec3(app->uniformBuffer, app->camera->GetPosition());
+    PushUInt(app->uniformBuffer, app->lights.size());
+
+    for (u32 i = 0; i < app->lights.size(); ++i)
+    {
+        AlignHead(app->uniformBuffer, sizeof(vec4));
+
+        Light& light = app->lights[i];
+
+        PushUInt(app->uniformBuffer, light.type);
+        PushVec3(app->uniformBuffer, light.color);
+        PushVec3(app->uniformBuffer, light.direction);
+        PushVec3(app->uniformBuffer, light.position);
+    }
+
+    app->globalParamsSize = app->uniformBuffer.head - app->globalParamsOffset;
+
+    // ------ Update uniform buffer lights End -------
+
+
+    // ------  Update uniform buffer entities -------
 
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
-        bufferHead = Utils::Align(bufferHead, app->uniformBlockAlignment);
-        app->entities[i].localParamsOffset = bufferHead;
+        AlignHead(app->uniformBuffer, app->uniformBlockAlignment);
 
-        memcpy(bufferData + bufferHead, glm::value_ptr(app->entities[i].GetTransform()), sizeof(glm::mat4));
-        bufferHead += sizeof(glm::mat4);
-        
-        memcpy(bufferData + bufferHead, glm::value_ptr(app->camera->GetViewProjection() * app->entities[i].GetTransform()), sizeof(glm::mat4));
-        bufferHead += sizeof(glm::mat4);
+        Entity& entity = app->entities[i];
+        glm::mat4 world = entity.GetTransform();
+        glm::mat4 mvp = app->camera->GetViewProjection() * entity.GetTransform();
 
-        app->entities[i].localParamsSize = bufferHead - app->entities[i].localParamsOffset;
+        entity.localParamsOffset = app->uniformBuffer.head;
+        PushMat4(app->uniformBuffer, world);
+        PushMat4(app->uniformBuffer, mvp);
+      
+        entity.localParamsSize = app->uniformBuffer.head - entity.localParamsOffset;
     }
     
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    UnmapBuffer(app->uniformBuffer);
 
-    // ------ Update Buffer Uniforms End -------
+    // ------ Update uniform buffer entities End -------
 }
 
 void Render(App* app)
@@ -818,35 +913,8 @@ void Render(App* app)
             Program& shaderModel = app->programs[app->modelShaderID];
             glUseProgram(shaderModel.handle);
 
-            for (u32 i = 0; i < app->entities.size(); ++i)
-            {
-                // Bind buffer handle
-                u32 blockOffset = 0;
-                u32 blockSize = sizeof(glm::mat4) * 2;
-                glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->bufferHandle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
-
-                Model& model = app->models[app->entities[i].modelIndex];
-                Mesh& mesh = app->meshes[model.meshIdx];
-
-                for (u32 j = 0; j < mesh.submeshes.size(); ++j)
-                {
-                    u32 vao = FindVao(mesh, j, shaderModel);
-                    glBindVertexArray(vao);
-
-
-                    u32 submeshMaterialIdx = model.materialIdx[j];
-                    Material& submeshMaterial = app->materials[submeshMaterialIdx];
-
-                    glUniform1i(app->modelShaderTextureUniformLocation, 0);
-                    glActiveTexture(GL_TEXTURE0);
-                    GLuint textureHandle = app->textures[app->modelTexture].handle;
-                    glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-                    Submesh& submesh = mesh.submeshes[j];
-                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-                    glBindVertexArray(0);
-                }
-            }
+            RenderLights(app, shaderModel);
+            RenderModels(app, shaderModel);
            
             glUseProgram(0);
         }
@@ -856,5 +924,38 @@ void Render(App* app)
     }
 }
 
+void RenderModels(App* app, Program shaderModel)
+{
+    for (u32 i = 0; i < app->entities.size(); ++i)
+    {
+        // Bind buffer handle
+        glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformBuffer.handle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
 
+        Model& model = app->models[app->entities[i].modelIndex];
+        Mesh& mesh = app->meshes[model.meshIdx];
 
+        for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+        {
+            u32 vao = FindVao(mesh, j, shaderModel);
+            glBindVertexArray(vao);
+
+            u32 submeshMaterialIdx = model.materialIdx[j];
+            Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+            glUniform1i(app->modelShaderTextureUniformLocation, 0);
+            glActiveTexture(GL_TEXTURE0);
+            GLuint textureHandle = app->textures[app->modelTexture].handle;
+            glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+            Submesh& submesh = mesh.submeshes[j];
+            glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+            glBindVertexArray(0);
+        }
+    }
+}
+
+void RenderLights(App* app, Program shaderModel)
+{
+    // Bind buffer handle
+    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+}

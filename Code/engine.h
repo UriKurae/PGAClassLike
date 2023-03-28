@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "platform.h"
 #include <glad/glad.h>
 #include "Models.h"
+#include "Lights.h"
 #include "Camera.h"
 
 typedef glm::vec2  vec2;
@@ -54,6 +54,16 @@ struct OpenGLInfo
     std::vector<std::string>    glExtensions;
 };
 
+
+struct Buffer
+{
+    u32 size;
+    GLenum type;
+    u32 handle;
+    void* data;
+    u32 head;
+};
+
 struct VertexV3V2
 {
     glm::vec3 pos;
@@ -73,6 +83,8 @@ const u16 indices[] =
     0, 1, 2,
     0, 2, 3
 };
+
+
 
 struct App
 {
@@ -109,10 +121,19 @@ struct App
     // Entities
     std::vector<Entity> entities;
 
-    // Uniform buffers
-    u32 bufferHandle;
+    // Lights
+    std::vector<Light> lights;
+
+    // Uniform buffers size and alignment
     i32 maxUniformBufferSize;
     i32 uniformBlockAlignment;
+
+    // Local Uniform buffers
+    Buffer uniformBuffer;
+
+    // Global uniform buffer
+    u32 globalParamsOffset;
+    u32 globalParamsSize;
 
     // program indices
     u32 texturedGeometryProgramIdx;
@@ -149,4 +170,7 @@ void Gui(App* app);
 void Update(App* app);
 
 void Render(App* app);
+
+void RenderModels(App* app, Program shaderModel);
+void RenderLights(App* app, Program shaderModel);
 
