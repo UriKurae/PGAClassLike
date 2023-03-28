@@ -787,6 +787,22 @@ void Gui(App* app)
         
         ImGui::End();
     }
+    for (u32 i = 0; i < app->lights.size(); ++i)
+    {
+        ImGui::Begin("Lights Info");
+        ImGui::PushID(i);
+        
+        Light& light = app->lights[i];
+
+        ImGui::Text("Light %d (Directional)", i);
+
+        ImGui::ColorPicker3("Light Color", &light.color[0]);
+        
+        ImGui::PopID();
+        ImGui::End();
+    }
+    
+    
     // TODO: Uncomment for OpenGL info.
     //ImGui::OpenPopup("OpenGL Info");
     if (ImGui::BeginPopup("OpenGL Info"))
@@ -815,6 +831,7 @@ void Update(App* app)
     // Update Camera
     app->camera->Update(app->input, app->deltaTime);
 
+#pragma region Update Uniform buffers
     // ------ Update uniform buffer lights -------
     MapBuffer(app->uniformBuffer, GL_WRITE_ONLY);
 
@@ -853,13 +870,15 @@ void Update(App* app)
         entity.localParamsOffset = app->uniformBuffer.head;
         PushMat4(app->uniformBuffer, world);
         PushMat4(app->uniformBuffer, mvp);
-      
+
         entity.localParamsSize = app->uniformBuffer.head - entity.localParamsOffset;
     }
-    
+
     UnmapBuffer(app->uniformBuffer);
 
-    // ------ Update uniform buffer entities End -------
+    // ------ Update uniform buffer entities End -------  
+#pragma endregion
+
 }
 
 void Render(App* app)
