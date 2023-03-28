@@ -37,6 +37,7 @@ void main()
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
 in vec2 vTexCoord;
+in vec3 vNormal;
 
 uniform sampler2D uTexture;
 
@@ -59,11 +60,21 @@ layout(location=0) out vec4 oColor;
 
 void main()
 {
+	vec4 textureColor = texture(uTexture, vTexCoord);
+
 	
-		oColor = vec4(uLight[0].color, 1.0);
+
+	for (int i = 0; i < uLightCount; ++i)
+	{
+		vec3 lightDir = normalize(uLight[i].direction);
+		float diff = max(dot(vNormal, lightDir), 0.0);
+		vec3 diffuse = diff * uLight[i].color;
+
+		textureColor.rgb += diffuse;
+	}
 	
-	//oColor = texture(uTexture, vTexCoord);
 	
+	oColor = textureColor;
 }
 
 #endif
