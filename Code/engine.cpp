@@ -731,9 +731,26 @@ void Init(App* app)
 
 void Gui(App* app)
 {
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Render Mode"))
+        {
+            const char* items[] = { "Albedo", "Normals" ,"Depth"};
+            static int item_current = 0;
+            ImGui::Text("Select Desired:");
+            ImGui::Combo("##combo", &item_current, items, IM_ARRAYSIZE(items));
+            app->renderTarget = (RenderTarget)item_current;
+            ImGui::EndMenu();
+        }
+       
+        ImGui::EndMainMenuBar();
+    }
+
     ImGui::Begin("Info");
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
     ImGui::End();
+
+    ImGui::ShowDemoWindow();
 
     ImGui::Begin("Camera Info");
     ImGui::Text("Cam Pos: %f, %f, %f", app->camera->GetPosition().x, app->camera->GetPosition().y, app->camera->GetPosition().z);
@@ -935,9 +952,9 @@ void Render(App* app)
             app->framebuffer->Bind();
             
             // Specify which color attachments to draw to
-            GLuint attachments[] = {  app->framebuffer->depthAttachmentId };
+            GLuint attachments[] = {  app->framebuffer->colorAttachmentId };
             //app->framebuffer->DrawAttachments(1, attachments);
-            glDrawBuffers(2, attachments);
+            glDrawBuffers(1, attachments);
             
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glEnable(GL_DEPTH_TEST);
@@ -961,9 +978,11 @@ void Render(App* app)
             u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
             glUniform1i(colorLocation, 0);
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
-            
+            glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentId);
 
+            u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
+            glUniform1i(renderLocationUniform, (int)app->renderTarget);
+            
             glDisable(GL_DEPTH_TEST);
             DrawQuadVao(app);
 

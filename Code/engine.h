@@ -96,6 +96,13 @@ const float quadVertices[]
      1.0f,  1.0f,  1.0f, 1.0f
 };
 
+enum class RenderTarget
+{
+    RENDER_ALBEDO = 0,
+    RENDER_DEPTH,
+    RENDER_NORMALS
+};
+
 struct App
 {
     // Loop
@@ -161,6 +168,9 @@ struct App
     u32 blackTexIdx;
     u32 normalTexIdx;
     u32 magentaTexIdx;
+
+    //Render Target
+    RenderTarget renderTarget;
 
     // Mode
     Mode mode;

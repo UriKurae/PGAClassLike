@@ -24,12 +24,24 @@ in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
 
+uniform int renderTarget;
+
 layout(location=0) out vec4 oColor;
 
 void main()
 {
-	float depth = texture(screenTexture, TexCoords).r;
-	oColor = vec4(vec3(depth), 1.0);
+	
+	switch(renderTarget)
+	{
+	 case 0:
+		oColor = texture(screenTexture, TexCoords);
+	 break;
+	 case 1:
+		float depth = texture(screenTexture, TexCoords).z;
+		oColor = vec4(vec3(depth), 1.0);
+	 break;
+	}
+	
 }
 
 #endif
