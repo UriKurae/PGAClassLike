@@ -114,6 +114,8 @@
     </None>
     <None Include="Code\BufferUtilities.h" />
     <None Include="Code\Lights.h" />
-    <None Include="WorkingDir\quadFrameBuffer.glsl" />
+    <None Include="WorkingDir\quadFrameBuffer.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

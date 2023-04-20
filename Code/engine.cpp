@@ -952,9 +952,9 @@ void Render(App* app)
             app->framebuffer->Bind();
             
             // Specify which color attachments to draw to
-            GLuint attachments[] = {  app->framebuffer->colorAttachmentId };
-            //app->framebuffer->DrawAttachments(1, attachments);
-            glDrawBuffers(1, attachments);
+           // GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0};
+           // //app->framebuffer->DrawAttachments(3, attachments);
+           // glDrawBuffers(2, attachments);
             
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glEnable(GL_DEPTH_TEST);
@@ -978,7 +978,22 @@ void Render(App* app)
             u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
             glUniform1i(colorLocation, 0);
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentId);
+            switch (app->renderTarget)
+            {
+            case RenderTarget::RENDER_ALBEDO:
+
+                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentId);
+                break;
+            case RenderTarget::RENDER_NORMALS:
+
+                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
+                break;
+            case RenderTarget::RENDER_DEPTH:
+
+                glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
+                break;
+            }
+           
 
             u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
             glUniform1i(renderLocationUniform, (int)app->renderTarget);

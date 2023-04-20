@@ -37,6 +37,10 @@ void main()
 		oColor = texture(screenTexture, TexCoords);
 	 break;
 	 case 1:
+		vec3 normalColor = texture(screenTexture, TexCoords).rgb;
+		oColor = vec4(normalColor, 1.0);
+	 break;
+	 case 2:
 		float depth = texture(screenTexture, TexCoords).z;
 		oColor = vec4(vec3(depth), 1.0);
 	 break;

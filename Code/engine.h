@@ -99,8 +99,8 @@ const float quadVertices[]
 enum class RenderTarget
 {
     RENDER_ALBEDO = 0,
-    RENDER_DEPTH,
-    RENDER_NORMALS
+    RENDER_NORMALS,
+    RENDER_DEPTH
 };
 
 struct App

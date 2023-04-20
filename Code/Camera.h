@@ -9,7 +9,7 @@ public:
 	EditorCamera(int width, int height, float near, float far);
 	~EditorCamera();
 
-	void Update(Input input, float dt);
+	void Update(Input& input, float dt);
 	void UpdateFov(float newFov);
 
 	glm::mat4& GetView() { return view; }

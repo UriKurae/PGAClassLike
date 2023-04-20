@@ -22,7 +22,7 @@ EditorCamera::~EditorCamera()
 {
 }
 
-void EditorCamera::Update(Input input, float dt)
+void EditorCamera::Update(Input& input, float dt)
 {
 
 	if (input.keys[K_W] == ButtonState::BUTTON_PRESSED)
