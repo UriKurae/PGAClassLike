@@ -38,6 +38,7 @@ void main()
 
 in vec2 vTexCoord;
 in vec3 vNormal;
+in vec3 vPosition;
 
 uniform sampler2D uTexture;
 
@@ -59,6 +60,7 @@ layout(binding = 0, std140) uniform GlobalParams
 layout(location=0) out vec4 oColor;
 layout(location=1) out vec4 normalColor;
 layout(location=2) out vec4 depthColor;
+layout(location=3) out vec4 positionColor;
 
 void main()
 {
@@ -77,6 +79,7 @@ void main()
 	oColor = textureColor;
 	normalColor = vec4(vec3(vNormal), 1.0);
 	depthColor = vec4(vec3(texture(uTexture, vTexCoord).z), 1.0);
+	positionColor = vec4(vPosition, 1.0);
 }
 
 #endif

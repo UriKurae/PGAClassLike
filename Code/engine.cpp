@@ -735,11 +735,11 @@ void Gui(App* app)
     {
         if (ImGui::BeginMenu("Render Mode"))
         {
-            const char* items[] = { "Albedo", "Normals" ,"Depth"};
-            static int item_current = 0;
+            const char* items[] = { "Albedo", "Normals" ,"Depth", "Position"};
+            static int itemCurrent = 0;
             ImGui::Text("Select Desired:");
-            ImGui::Combo("##combo", &item_current, items, IM_ARRAYSIZE(items));
-            app->renderTarget = (RenderTarget)item_current;
+            ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items));
+            app->renderTarget = (RenderTarget)itemCurrent;
             ImGui::EndMenu();
         }
        
@@ -991,6 +991,10 @@ void Render(App* app)
             case RenderTarget::RENDER_DEPTH:
 
                 glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
+                break;
+            case RenderTarget::RENDER_POSITION:
+
+                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPostionId);
                 break;
             }
            

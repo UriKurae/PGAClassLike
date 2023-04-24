@@ -100,7 +100,8 @@ enum class RenderTarget
 {
     RENDER_ALBEDO = 0,
     RENDER_NORMALS,
-    RENDER_DEPTH
+    RENDER_DEPTH,
+    RENDER_POSITION
 };
 
 struct App
