@@ -653,20 +653,28 @@ void Init(App* app)
      
     // Lights
     Light light;
-    light.type = LightType::LightType_Point;
-    light.position = glm::vec3(0.0f, 2.0f, 0.0f);
-    light.direction = glm::vec3(1.0f);
+    light.type = LightType::LightType_Directional;
+    light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    light.direction = glm::vec3(-1.0f);
     light.color = glm::vec3(0.0f, 0.0f, 0.0f);
 
     app->lights.push_back(light);
 
     Light light2;
-    light2.type = LightType::LightType_Point;
-    light2.position = glm::vec3(0.0f, 2.0f, 0.0f);
+    light2.type = LightType::LightType_Directional;
+    light2.position = glm::vec3(0.0f, 0.0f, 0.0f);
     light2.direction = glm::vec3(1.0f);
     light2.color = glm::vec3(0.4f, 0.0f, 0.4f);
 
     app->lights.push_back(light2);
+
+    Light light3;
+    light3.type = LightType::LightType_Point;
+    light3.position = glm::vec3(0.0f, 1.0f, 0.0f);
+    light3.direction = glm::vec3(1.0f);
+    light3.color = glm::vec3(0.4f, 0.0f, 0.4f);
+
+    app->lights.push_back(light3);
 
 
     // End Lights
@@ -750,7 +758,8 @@ void Gui(App* app)
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
     ImGui::End();
 
-    ImGui::ShowDemoWindow();
+    // Show demo window enjain
+    //ImGui::ShowDemoWindow();
 
     ImGui::Begin("Camera Info");
     ImGui::Text("Cam Pos: %f, %f, %f", app->camera->GetPosition().x, app->camera->GetPosition().y, app->camera->GetPosition().z);
@@ -817,8 +826,31 @@ void Gui(App* app)
         
         Light& light = app->lights[i];
 
-        ImGui::Text("Light %d (Directional)", i);
+        switch (light.type)
+        {
+        case LightType::LightType_Point:
+        {
+            ImGui::Text("Light %d (Point)", i);
+            ImGui::Text("Pos:");
+            float windowWidth = ImGui::GetContentRegionAvailWidth();
+            ImGui::PushItemWidth(50.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##PosX", &light.position.x, 0.1f);
 
+            ImGui::SameLine();
+            ImGui::DragFloat("##PosY", &light.position.y, 0.1f);
+
+            ImGui::SameLine();
+            ImGui::DragFloat("##PosZ", &light.position.z, 0.1f);
+
+            ImGui::PopItemWidth();
+            break;
+        }
+        case LightType::LightType_Directional:
+            ImGui::Text("Light %d (Directional)", i);
+            break;
+        }
+       
         ImGui::ColorPicker3("Light Color", &light.color[0]);
         
         ImGui::PopID();

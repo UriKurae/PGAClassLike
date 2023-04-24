@@ -20,6 +20,7 @@ layout(location=4) in vec3 aBiTangent;
 out vec2 vTexCoord;
 out vec3 vPosition;
 out vec3 vNormal;
+out vec3 fragPos;
 
 void main()
 {
@@ -29,8 +30,6 @@ void main()
 	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
 	
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
-
-	//gl_Position = vec4(aPosition, 5.0);
 
 }
 
@@ -68,11 +67,27 @@ void main()
 
 	for (int i = 0; i < uLightCount; ++i)
 	{
-		vec3 lightDir = normalize(uLight[i].direction);
-		float diff = max(dot(vNormal, lightDir), 0.0);
-		vec3 diffuse = diff * uLight[i].color;
+		if (uLight[i].type == 0)
+		{
+			vec3 lightDir = normalize(uLight[i].direction);
+			float diff = max(dot(vNormal, lightDir), 0.0);
+			vec3 diffuse = diff * uLight[i].color;
 
-		textureColor.rgb += diffuse;
+			textureColor.rgb += diffuse;
+		}
+		else if (uLight[i].type == 1)
+		{
+			vec3 norm = normalize(vNormal);
+			vec3 lightDir = normalize(uLight[i].position - vPosition);
+
+			float diff = max(dot(norm, lightDir), 0.0);
+			vec3 diffuse = diff * uLight[i].color;
+
+			float ambientStrength = 0.1;
+			vec3 ambientLight = ambientStrength * uLight[i].color;			
+
+			textureColor.rgb *= (diffuse + ambientLight);
+		}
 	}
 	
 	
