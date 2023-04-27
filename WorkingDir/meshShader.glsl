@@ -93,11 +93,13 @@ void main()
 			float specularLight = specularStrength * spec;
 
 			textureColor.rgb = (diffuse + ambientLight + specularLight) * ( textureColor.rgb);
+			
 		}
 	}
 	
 	
-	oColor = textureColor;
+	oColor.rgb = textureColor.rgb;
+	oColor.a = texture(uTexture, vTexCoord).r;
 	normalColor = vec4(vec3(vNormal), 1.0);
 	depthColor = vec4(vec3(texture(uTexture, vTexCoord).z), 1.0);
 	positionColor = vec4(vPosition, 1.0);

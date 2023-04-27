@@ -823,7 +823,7 @@ void Gui(App* app)
     {
         ImGui::Begin("Lights Info");
         ImGui::PushID(i);
-        
+
         Light& light = app->lights[i];
 
         switch (light.type)
@@ -850,9 +850,12 @@ void Gui(App* app)
             ImGui::Text("Light %d (Directional)", i);
             break;
         }
-       
-        ImGui::ColorPicker3("Light Color", &light.color[0]);
-        
+
+        if (ImGui::CollapsingHeader("Color Picker"))
+        {
+            ImGui::ColorPicker3("Light Color", &light.color[0]);
+        }
+
         ImGui::PopID();
         ImGui::End();
     }
@@ -1028,7 +1031,7 @@ void Render(App* app)
                 break;
             case RenderTarget::RENDER_POSITION:
 
-                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPostionId);
+                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
                 break;
             }
            

@@ -34,7 +34,8 @@ void main()
 	switch(renderTarget)
 	{
 	 case 0:
-		oColor = texture(screenTexture, TexCoords);
+		//oColor = texture(screenTexture, TexCoords);
+		oColor = vec4(vec3(texture(screenTexture, TexCoords).r), 1.0);
 	 break;
 	 case 1:
 		vec4 normalColor = texture(screenTexture, TexCoords);
