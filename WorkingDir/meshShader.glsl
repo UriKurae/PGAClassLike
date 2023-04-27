@@ -9,6 +9,7 @@ layout(binding = 1, std140) uniform LocalParams
 {
 	mat4 uWorldMatrix;
 	mat4 uWorldViewProjectionMatrix;
+	mat4 uWorldViewMatrix;
 };
 
 layout(location=0) in vec3 aPosition;
@@ -20,7 +21,6 @@ layout(location=4) in vec3 aBiTangent;
 out vec2 vTexCoord;
 out vec3 vPosition;
 out vec3 vNormal;
-out vec3 fragPos;
 
 void main()
 {
@@ -84,9 +84,15 @@ void main()
 			vec3 diffuse = diff * uLight[i].color;
 
 			float ambientStrength = 0.1;
-			vec3 ambientLight = ambientStrength * uLight[i].color;			
+			vec3 ambientLight = ambientStrength * uLight[i].color;
+			
+			float specularStrength = 0.5;
+			vec3 viewDir = normalize(uCameraPosition - vPosition);
+			vec3 reflectDir = reflect(-lightDir, norm);
+			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
+			float specularLight = specularStrength * spec;
 
-			textureColor.rgb *= (diffuse + ambientLight);
+			textureColor.rgb = (diffuse + ambientLight + specularLight) * ( textureColor.rgb);
 		}
 	}
 	

@@ -921,10 +921,12 @@ void Update(App* app)
         Entity& entity = app->entities[i];
         glm::mat4 world = entity.GetTransform();
         glm::mat4 mvp = app->camera->GetViewProjection() * entity.GetTransform();
+        glm::mat4 view = app->camera->GetView();
 
         entity.localParamsOffset = app->uniformBuffer.head;
         PushMat4(app->uniformBuffer, world);
         PushMat4(app->uniformBuffer, mvp);
+        PushMat4(app->uniformBuffer, view);
 
         entity.localParamsSize = app->uniformBuffer.head - entity.localParamsOffset;
     }
