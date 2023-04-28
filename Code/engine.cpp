@@ -743,7 +743,7 @@ void Gui(App* app)
     {
         if (ImGui::BeginMenu("Render Mode"))
         {
-            const char* items[] = { "Albedo", "Normals" ,"Depth", "Position"};
+            const char* items[] = { "Albedo", "Normals" , "Position", "Depth", "Specular"};
             static int itemCurrent = 0;
             ImGui::Text("Select Desired:");
             ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items));
@@ -1032,6 +1032,10 @@ void Render(App* app)
             case RenderTarget::RENDER_POSITION:
 
                 glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
+                break;
+            case RenderTarget::RENDER_SPECULAR:
+
+                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
                 break;
             }
            

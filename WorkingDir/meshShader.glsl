@@ -58,8 +58,9 @@ layout(binding = 0, std140) uniform GlobalParams
 
 layout(location=0) out vec4 oColor;
 layout(location=1) out vec4 normalColor;
-layout(location=2) out vec4 depthColor;
-layout(location=3) out vec4 positionColor;
+layout(location=2) out vec4 positionColor;
+layout(location=3) out vec4 depthColor;
+layout(location=4) out vec4 specularColor;
 
 void main()
 {
@@ -103,6 +104,9 @@ void main()
 	normalColor = vec4(vec3(vNormal), 1.0);
 	depthColor = vec4(vec3(texture(uTexture, vTexCoord).z), 1.0);
 	positionColor = vec4(vPosition, 1.0);
+
+	specularColor.rgb = texture(uTexture, vTexCoord).rgb;
+	specularColor.a = texture(uTexture, vTexCoord).r;
 }
 
 #endif

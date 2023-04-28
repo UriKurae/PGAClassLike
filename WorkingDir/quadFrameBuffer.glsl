@@ -34,19 +34,21 @@ void main()
 	switch(renderTarget)
 	{
 	 case 0:
-		//oColor = texture(screenTexture, TexCoords);
-		oColor = vec4(vec3(texture(screenTexture, TexCoords).r), 1.0);
+		oColor = texture(screenTexture, TexCoords);
 	 break;
 	 case 1:
 		vec4 normalColor = texture(screenTexture, TexCoords);
 		oColor = normalColor;
 	 break;
 	 case 2:
+	    oColor = texture(screenTexture, TexCoords);
+	 break;
+	 case 3:
 		float depth = texture(screenTexture, TexCoords).r;
 		oColor = vec4(vec3(depth), 1.0);
 	 break;
-	 case 3:
-		oColor = texture(screenTexture, TexCoords);
+	 case 4:
+		oColor = vec4(vec3(texture(screenTexture, TexCoords).r), 1.0);
 	 break;
 	}
 	
