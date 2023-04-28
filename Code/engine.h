@@ -128,6 +128,7 @@ struct App
 
     // Framebuffer image shader
     u32 quadFBshader;
+    u32 quadDeferredShader;
     u32 quadVao;
     u32 quadVbo;
 
@@ -150,6 +151,7 @@ struct App
     // Lights
     std::vector<Light> lights;
 
+    // --------- Uniform buffers mesh Shader ---------
     // Uniform buffers size and alignment
     i32 maxUniformBufferSize;
     i32 uniformBlockAlignment;
@@ -160,6 +162,20 @@ struct App
     // Global uniform buffer
     u32 globalParamsOffset;
     u32 globalParamsSize;
+    // --------- Uniform buffers mesh Shader end ---------
+
+    // --------- Uniform buffers Deferred ---------
+    // TODO: uUniform buffers size and alignment
+    //i32 maxUniformBufferSize;
+    //i32 uniformBlockAlignment;
+
+    //// Local Uniform buffers
+    //Buffer uniformBuffer;
+
+    //// Global uniform buffer
+    //u32 globalParamsOffset;
+    //u32 globalParamsSize;
+    // --------- Uniform buffers deferred Shader end ---------
 
     // program indices
     u32 texturedGeometryProgramIdx;
@@ -206,3 +222,5 @@ void RenderLights(App* app, Program shaderModel);
 void GenerateQuadVao(App* app);
 
 void DrawQuadVao(App* app);
+
+void DrawForwardRendering(App* app);

@@ -117,5 +117,8 @@
     <None Include="WorkingDir\quadFrameBuffer.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="WorkingDir\DeferredShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

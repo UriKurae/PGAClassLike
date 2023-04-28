@@ -598,6 +598,8 @@ void Init(App* app)
     GenerateQuadVao(app);
 
     app->quadFBshader = LoadProgram(app, "quadFrameBuffer.glsl", "QUAD_FRAMEBUFFER");
+
+    app->quadDeferredShader = LoadProgram(app, "DeferredShader.glsl", "QUAD_DEFERRED");
     
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
 
@@ -987,12 +989,7 @@ void Render(App* app)
             // First pass
             // Bind Custom framebuffer
             app->framebuffer->Bind();
-            
-            // Specify which color attachments to draw to
-           // GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0};
-           // //app->framebuffer->DrawAttachments(3, attachments);
-           // glDrawBuffers(2, attachments);
-            
+ 
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1009,39 +1006,7 @@ void Render(App* app)
             glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            Program& quadShader = app->programs[app->quadFBshader];
-            glUseProgram(quadShader.handle);
-
-            u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
-            glUniform1i(colorLocation, 0);
-            glActiveTexture(GL_TEXTURE0);
-            switch (app->renderTarget)
-            {
-            case RenderTarget::RENDER_ALBEDO:
-
-                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentId);
-                break;
-            case RenderTarget::RENDER_NORMALS:
-
-                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
-                break;
-            case RenderTarget::RENDER_DEPTH:
-
-                glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
-                break;
-            case RenderTarget::RENDER_POSITION:
-
-                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
-                break;
-            case RenderTarget::RENDER_SPECULAR:
-
-                glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
-                break;
-            }
-           
-
-            u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
-            glUniform1i(renderLocationUniform, (int)app->renderTarget);
+            DrawForwardRendering(app);
             
             glDisable(GL_DEPTH_TEST);
             DrawQuadVao(app);
@@ -1113,4 +1078,41 @@ void DrawQuadVao(App* app)
     glBindVertexArray(app->quadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+}
+
+void DrawForwardRendering(App* app)
+{
+    Program& quadShader = app->programs[app->quadFBshader];
+    glUseProgram(quadShader.handle);
+
+    u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
+    glUniform1i(colorLocation, 0);
+    glActiveTexture(GL_TEXTURE0);
+    switch (app->renderTarget)
+    {
+    case RenderTarget::RENDER_ALBEDO:
+
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentId);
+        break;
+    case RenderTarget::RENDER_NORMALS:
+
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
+        break;
+    case RenderTarget::RENDER_DEPTH:
+
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
+        break;
+    case RenderTarget::RENDER_POSITION:
+
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
+        break;
+    case RenderTarget::RENDER_SPECULAR:
+
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
+        break;
+    }
+
+
+    u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
+    glUniform1i(renderLocationUniform, (int)app->renderTarget);
 }
