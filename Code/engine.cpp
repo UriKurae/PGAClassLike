@@ -1005,8 +1005,15 @@ void Render(App* app)
 
             glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-
-            DrawForwardRendering(app);
+            
+            if (app->forward)
+            {
+                DrawForwardRendering(app);
+            }
+            else
+            {
+                DrawDeferredRendering(app);
+            }
             
             glDisable(GL_DEPTH_TEST);
             DrawQuadVao(app);
@@ -1111,6 +1118,36 @@ void DrawForwardRendering(App* app)
         glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
         break;
     }
+
+
+    u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
+    glUniform1i(renderLocationUniform, (int)app->renderTarget);
+}
+
+void DrawDeferredRendering(App* app)
+{
+    Program& quadShader = app->programs[app->quadDeferredShader];
+    glUseProgram(quadShader.handle);
+
+    u32 colorLocation = glGetUniformLocation(quadShader.handle, "gPosition");
+    glUniform1i(colorLocation, 0);
+
+    colorLocation = glGetUniformLocation(quadShader.handle, "gNormal");
+    glUniform1i(colorLocation, 1);
+
+    colorLocation = glGetUniformLocation(quadShader.handle, "gAlbedoSpec");
+    glUniform1i(colorLocation, 2);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
+    
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
+
+
 
 
     u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");

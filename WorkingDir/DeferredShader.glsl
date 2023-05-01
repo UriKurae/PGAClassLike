@@ -5,6 +5,12 @@
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
+layout(binding = 1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+	mat4 uWorldViewMatrix;
+};
 
 layout(location=0) in vec3 aPosition;
 layout(location=1) in vec2 aTexCoord;
@@ -21,10 +27,6 @@ void main()
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
 in vec2 TexCoords;
-
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
 
 struct Light
 {
@@ -43,10 +45,33 @@ layout(binding = 0, std140) uniform GlobalParams
 
 layout(location=0) out vec4 oColor;
 
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedoSpec;
+
+
 void main()
 {
-	
-	
+	vec3 FragPos = texture(gPosition, TexCoords).rgb;
+	vec3 Normal = texture(gNormal, TexCoords).rgb;
+	vec3 Albedo = texture(gAlbedoSpec, TexCoords).rgb;
+	float Specular = texture(gAlbedoSpec, TexCoords).a;
+
+	vec3 lighting = Albedo * 0.25;
+	vec3 viewDir = normalize(uCameraPosition - FragPos);
+
+	for (int i = 0; i < uLightCount; ++i)
+	{
+		if (uLight[i].type == 1)
+		{
+		vec3 lightDir = normalize(uLight[i].position - FragPos);
+		vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Albedo * uLight[i].color;
+
+		lighting += diffuse;
+		}
+		
+	}
+	oColor = vec4(lighting,1.0);
 }
 
 #endif

@@ -120,6 +120,9 @@ struct App
 
     ivec2 displaySize;
 
+    // Forward and Deferred
+    bool forward = false;
+
     // Camera
     std::shared_ptr<EditorCamera> camera;
 
@@ -163,19 +166,6 @@ struct App
     u32 globalParamsOffset;
     u32 globalParamsSize;
     // --------- Uniform buffers mesh Shader end ---------
-
-    // --------- Uniform buffers Deferred ---------
-    // TODO: uUniform buffers size and alignment
-    //i32 maxUniformBufferSize;
-    //i32 uniformBlockAlignment;
-
-    //// Local Uniform buffers
-    //Buffer uniformBuffer;
-
-    //// Global uniform buffer
-    //u32 globalParamsOffset;
-    //u32 globalParamsSize;
-    // --------- Uniform buffers deferred Shader end ---------
 
     // program indices
     u32 texturedGeometryProgramIdx;
@@ -224,3 +214,5 @@ void GenerateQuadVao(App* app);
 void DrawQuadVao(App* app);
 
 void DrawForwardRendering(App* app);
+
+void DrawDeferredRendering(App* app);
