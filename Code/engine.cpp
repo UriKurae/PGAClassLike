@@ -1120,7 +1120,7 @@ void DrawForwardRendering(App* app)
 {
     Program& quadShader = app->programs[app->quadFBshader];
     glUseProgram(quadShader.handle);
-
+    glEnable(GL_BLEND);
     u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
     glUniform1i(colorLocation, 0);
     glActiveTexture(GL_TEXTURE0);
@@ -1155,6 +1155,7 @@ void DrawForwardRendering(App* app)
 
 void DrawDeferredRendering(App* app)
 {
+    glDisable(GL_BLEND);
     Program& quadShader = app->programs[app->quadDeferredShader];
     glUseProgram(quadShader.handle);
 
@@ -1167,6 +1168,9 @@ void DrawDeferredRendering(App* app)
     colorLocation = glGetUniformLocation(quadShader.handle, "gAlbedoSpec");
     glUniform1i(colorLocation, 2);
 
+    colorLocation = glGetUniformLocation(quadShader.handle, "gColor");
+    glUniform1i(colorLocation, 3);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
 
@@ -1176,9 +1180,6 @@ void DrawDeferredRendering(App* app)
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
 
-
-
-
-    u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
-    glUniform1i(renderLocationUniform, (int)app->renderTarget);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentAlbedoId);
 }
