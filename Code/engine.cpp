@@ -656,7 +656,9 @@ void Init(App* app)
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 #pragma endregion
      
-    // Lights
+    // ------- Lights -------
+
+    // ------- Directional Lights -------
     Light light;
     light.type = LightType::LightType_Directional;
     light.position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -673,16 +675,36 @@ void Init(App* app)
 
     app->lights.push_back(light2);
 
+    // ------- Directional Lights End -------
+
+
+    // ------- Point Lights -------
     Light light3;
     light3.type = LightType::LightType_Point;
-    light3.position = glm::vec3(0.0f, 1.0f, 0.0f);
+    light3.position = glm::vec3(0.0f, 0.0f, 1.0f);
     light3.direction = glm::vec3(1.0f);
     light3.color = glm::vec3(0.4f, 0.0f, 0.4f);
 
     app->lights.push_back(light3);
 
+    Light light4;
+    light4.type = LightType::LightType_Point;
+    light4.position = glm::vec3(5.0f, 0.0f, 1.0f);
+    light4.direction = glm::vec3(1.0f);
+    light4.color = glm::vec3(0.4f, 0.0f, 0.4f);
 
-    // End Lights
+    app->lights.push_back(light4);
+
+    Light light5;
+    light5.type = LightType::LightType_Point;
+    light5.position = glm::vec3(-5.0f, 0.0f, 1.0f);
+    light5.direction = glm::vec3(1.0f);
+    light5.color = glm::vec3(0.4f, 0.0f, 0.4f);
+
+    app->lights.push_back(light5);
+    // ------- Point Lights End -------
+
+    // ------- End Lights -------
 
 
     // Mesh Program

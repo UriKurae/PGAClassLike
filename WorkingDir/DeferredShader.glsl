@@ -64,7 +64,7 @@ void main()
 	}
 
 	// TODO: Base ambient light *Hardcoded for now, must pass uniform whenever!*
-	vec3 lighting = Diffuse * 0.25;
+	vec3 lighting = Diffuse * 0.1;
 	vec3 viewDir = normalize(uCameraPosition - FragPos);
 
 	for (int i = 0; i < uLightCount; ++i)

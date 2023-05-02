@@ -73,11 +73,21 @@ void main()
 		{
 			if (uLight[i].type == 0)
 			{
+				vec3 norm = normalize(vNormal);
 				vec3 lightDir = normalize(uLight[i].direction);
 				float diff = max(dot(vNormal, lightDir), 0.0);
 				vec3 diffuse = diff * uLight[i].color;
 
-				textureColor.rgb += diffuse;
+				float ambientStrength = 0.1;
+				vec3 ambientLight = ambientStrength * uLight[i].color;
+
+				float specularStrength = 0.5;
+				vec3 viewDir = normalize(uCameraPosition - vPosition);
+				vec3 reflectDir = reflect(-lightDir, norm);
+				float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
+				vec3 specularLight = specularStrength * spec * uLight[i].color;
+
+				textureColor.rgb += (ambientLight + specularLight + diffuse) * textureColor.rgb;
 			}
 			else if (uLight[i].type == 1)
 			{
@@ -96,7 +106,7 @@ void main()
 				float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
 				float specularLight = specularStrength * spec;
 
-				textureColor.rgb = (diffuse + ambientLight + specularLight) * ( textureColor.rgb);
+				textureColor.rgb += (diffuse + ambientLight + specularLight) * ( textureColor.rgb);
 				
 			}
 		}
