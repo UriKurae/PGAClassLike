@@ -57,21 +57,47 @@ void main()
 	vec3 Albedo = texture(gAlbedoSpec, TexCoords).rgb;
 	float Specular = texture(gAlbedoSpec, TexCoords).a;
 
-	vec3 lighting = Albedo * 0.25;
+	// TODO: Base ambient light *Hardcoded for now, must pass uniform whenever!*
+	//vec3 lighting = Albedo * 0.25;
+	vec3 lighting = vec3(0.0);
 	vec3 viewDir = normalize(uCameraPosition - FragPos);
 
 	for (int i = 0; i < uLightCount; ++i)
 	{
-		if (uLight[i].type == 1)
+		if (uLight[i].type == 0)
 		{
-		vec3 lightDir = normalize(uLight[i].position - FragPos);
-		vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Albedo * uLight[i].color;
+			vec3 lightDir = normalize(uLight[i].direction);
+			
+			// Diffuse light
+			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Albedo * uLight[i].color;
 
-		lighting += diffuse;
+			// Specular light
+			float specularStrength = 0.5;
+			vec3 reflectDir = reflect(-lightDir, Normal);
+			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+			float specularLight = Specular * specularStrength * spec;
+			
+
+			lighting += diffuse + specularLight + (uLight[i].color * 0.25);
+		}
+		else if (uLight[i].type == 1)
+		{
+			vec3 lightDir = normalize(uLight[i].position - FragPos);
+			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Albedo * uLight[i].color;
+
+			// Specular light
+			float specularStrength = 0.5;
+			vec3 reflectDir = reflect(-lightDir, Normal);
+			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+			float specularLight = Specular * specularStrength * spec;
+
+			lighting += diffuse + specularLight + (uLight[i].color * 0.25);
 		}
 		
 	}
-	oColor = vec4(lighting,1.0);
+	
+	vec3 finalColor = Albedo * lighting;
+	oColor = vec4(finalColor,1.0);
 }
 
 #endif
