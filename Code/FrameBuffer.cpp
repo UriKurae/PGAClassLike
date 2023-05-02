@@ -13,8 +13,8 @@ FrameBuffer::~FrameBuffer()
 
 void FrameBuffer::SetupFrameBuffer(glm::vec2 displaySize)
 {
-	glGenTextures(1, &colorAttachmentId);
-	glBindTexture(GL_TEXTURE_2D, colorAttachmentId);
+	glGenTextures(1, &colorAttachmentAlbedoId);
+	glBindTexture(GL_TEXTURE_2D, colorAttachmentAlbedoId);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, displaySize.x, displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -66,7 +66,7 @@ void FrameBuffer::SetupFrameBuffer(glm::vec2 displaySize)
 
 	glGenFramebuffers(1, &rendererID);
 	glBindFramebuffer(GL_FRAMEBUFFER, rendererID);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorAttachmentId, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorAttachmentAlbedoId, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, colorAttachmentNormalsId, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, colorAttachmentPositionId, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, colorAttachmentSpecularId, 0);

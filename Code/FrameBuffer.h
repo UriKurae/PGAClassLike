@@ -14,7 +14,7 @@ public:
 	void DrawAttachments(u32 count, u32 attachments[]);
 
 public:
-	u32 colorAttachmentId;
+	u32 colorAttachmentAlbedoId;
 	u32 colorAttachmentNormalsId;
 	u32 colorAttachmentPositionId;
 	u32 depthAttachmentId;

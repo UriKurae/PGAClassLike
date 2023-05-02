@@ -595,6 +595,9 @@ void Init(App* app)
     // - programs (and retrieve uniform indices)
     // - textures
 
+    app->shadingType = ShadingType::FORWARD;
+    app->renderTarget = RenderTarget::RENDER_ALBEDO;
+
     GenerateQuadVao(app);
 
     app->quadFBshader = LoadProgram(app, "quadFrameBuffer.glsl", "QUAD_FRAMEBUFFER");
@@ -743,13 +746,31 @@ void Gui(App* app)
 {
     if (ImGui::BeginMainMenuBar())
     {
+        if (ImGui::BeginMenu("Render Targets"))
+        {
+            if (app->shadingType == ShadingType::FORWARD)
+            {
+                const char* items[] = { "Albedo", "Normals" , "Position", "Depth", "Specular" };
+                static int itemCurrent = 0;
+                ImGui::Text("Select Desired:");
+                ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items));
+                app->renderTarget = (RenderTarget)itemCurrent;
+                ImGui::EndMenu();
+            }
+            else
+            {
+                ImGui::Text("Must be in Forward Render Mode to select targets!");
+                ImGui::EndMenu();
+            }
+        }
+
         if (ImGui::BeginMenu("Render Mode"))
         {
-            const char* items[] = { "Albedo", "Normals" , "Position", "Depth", "Specular"};
-            static int itemCurrent = 0;
+            const char* items[] = { "Forward", "Deferred"};
+            static int currentRenderMode = 0;
             ImGui::Text("Select Desired:");
-            ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items));
-            app->renderTarget = (RenderTarget)itemCurrent;
+            ImGui::Combo("##combo", &currentRenderMode, items, IM_ARRAYSIZE(items));
+            app->shadingType = (ShadingType)currentRenderMode;
             ImGui::EndMenu();
         }
        
@@ -997,6 +1018,9 @@ void Render(App* app)
             Program& shaderModel = app->programs[app->modelShaderID];
             glUseProgram(shaderModel.handle);
 
+            u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
+            glUniform1i(renderModeUniform, (int)app->renderTarget);
+
             RenderLights(app, shaderModel);
             RenderModels(app, shaderModel);
            
@@ -1006,14 +1030,19 @@ void Render(App* app)
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             
-            if (app->forward)
+            switch (app->shadingType)
             {
+            case ShadingType::FORWARD:
                 DrawForwardRendering(app);
-            }
-            else
-            {
+                break;
+            case ShadingType::DEFERRED:
                 DrawDeferredRendering(app);
+                break;
+            default:
+                assert((app->shadingType == ShadingType::DEFERRED) || (app->shadingType == ShadingType::FORWARD));
+                ELOG("There must be a type of shading method selected!");
             }
+            
             
             glDisable(GL_DEPTH_TEST);
             DrawQuadVao(app);
@@ -1099,7 +1128,7 @@ void DrawForwardRendering(App* app)
     {
     case RenderTarget::RENDER_ALBEDO:
 
-        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentId);
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentAlbedoId);
         break;
     case RenderTarget::RENDER_NORMALS:
 

@@ -105,6 +105,12 @@ enum class RenderTarget
     RENDER_SPECULAR
 };
 
+enum class ShadingType
+{
+    FORWARD = 0,
+    DEFERRED
+};
+
 struct App
 {
     // Loop
@@ -121,7 +127,7 @@ struct App
     ivec2 displaySize;
 
     // Forward and Deferred
-    bool forward = false;
+    ShadingType shadingType;
 
     // Camera
     std::shared_ptr<EditorCamera> camera;
