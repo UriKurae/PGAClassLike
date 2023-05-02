@@ -64,7 +64,7 @@ void main()
 	}
 
 	// TODO: Base ambient light *Hardcoded for now, must pass uniform whenever!*
-	vec3 lighting = Diffuse * 0.1;
+	vec3 lighting = vec3(0.0);
 	vec3 viewDir = normalize(uCameraPosition - FragPos);
 
 	for (int i = 0; i < uLightCount; ++i)
@@ -73,6 +73,8 @@ void main()
 		{
 			vec3 lightDir = normalize(uLight[i].direction);
 			
+			vec3 ambient = Diffuse * 0.1;
+
 			// Diffuse light
 			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
 			
@@ -80,13 +82,14 @@ void main()
 			float specularStrength = 0.5;
 			vec3 reflectDir = reflect(-lightDir, Normal);
 			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-			float specularLight = Specular * specularStrength * spec;
+			vec3 specularLight = vec3(Specular * specularStrength * spec);
 			
 			
-			lighting += diffuse + specularLight;
+			lighting += ambient + diffuse + specularLight;
 		}
 		else if (uLight[i].type == 1)
 		{
+			vec3 ambient = Diffuse * 0.1;
 
 			vec3 lightDir = normalize(uLight[i].position - FragPos);
 			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
@@ -95,9 +98,9 @@ void main()
 			float specularStrength = 0.5;
 			vec3 reflectDir = reflect(-lightDir, Normal);
 			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-			float specularLight = Specular * specularStrength * spec;
+			vec3 specularLight = vec3(Specular * specularStrength * spec);
 			
-			lighting += diffuse + specularLight;
+			lighting += ambient + diffuse + specularLight;
 		}
 		
 	}

@@ -63,6 +63,9 @@ layout(location=2) out vec4 positionColor;
 layout(location=3) out vec4 depthColor;
 layout(location=4) out vec4 specularColor;
 
+vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection);
+vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection);
+
 void main()
 {
 	vec4 textureColor = texture(uTexture, vTexCoord);
@@ -74,45 +77,24 @@ void main()
 			if (uLight[i].type == 0)
 			{
 				vec3 norm = normalize(vNormal);
-				vec3 lightDir = normalize(uLight[i].direction);
-				float diff = max(dot(vNormal, lightDir), 0.0);
-				vec3 diffuse = diff * uLight[i].color;
-
-				float ambientStrength = 0.1;
-				vec3 ambientLight = ambientStrength * uLight[i].color;
-
-				float specularStrength = 0.5;
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
-				vec3 reflectDir = reflect(-lightDir, norm);
-				float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
-				vec3 specularLight = specularStrength * spec * uLight[i].color;
+				
+				vec3 finalLight = CalcDirLight(norm, uLight[i], viewDir);
 
-				textureColor.rgb += (ambientLight + specularLight + diffuse) * textureColor.rgb;
+				textureColor.rgb += finalLight * textureColor.rgb;
 			}
 			else if (uLight[i].type == 1)
 			{
 				vec3 norm = normalize(vNormal);
-				vec3 lightDir = normalize(uLight[i].position - vPosition);
-
-				float diff = max(dot(norm, lightDir), 0.0);
-				vec3 diffuse = diff * uLight[i].color;
-
-				float ambientStrength = 0.1;
-				vec3 ambientLight = ambientStrength * uLight[i].color;
-				
-				float specularStrength = 0.5;
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
-				vec3 reflectDir = reflect(-lightDir, norm);
-				float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
-				float specularLight = specularStrength * spec;
 
-				textureColor.rgb += (diffuse + ambientLight + specularLight) * ( textureColor.rgb);
+				vec3 finalLight = CalcPointLight(norm, uLight[i], viewDir);
+
+				textureColor.rgb += finalLight * textureColor.rgb;
 				
 			}
 		}
-	}
-	
-	
+	}	
 	// Store albedo color
 	albedoColor.rgb = textureColor.rgb;
 
@@ -124,6 +106,40 @@ void main()
 	// Store albedo and specular component
 	specularColor.rgb = texture(uTexture, vTexCoord).rgb;
 	specularColor.a = texture(uTexture, vTexCoord).r;
+}
+
+vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection)
+{
+	vec3 lightDir = normalize(dirLight.direction);
+	float diff = max(dot(normal, lightDir), 0.0);
+	vec3 diffuse = diff * dirLight.color;
+	
+	float ambientStrength = 0.1;
+	vec3 ambientLight = ambientStrength * dirLight.color;
+	
+	float specularStrength = 0.5;
+	vec3 reflectDir = reflect(-lightDir, normal);
+	float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 128.0);
+	vec3 specularLight = specularStrength * spec * dirLight.color;
+
+	return diffuse + ambientLight + specularLight;
+}
+
+vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection)
+{
+	vec3 lightDir = normalize(pointLight.position - vPosition);
+	float diff = max(dot(normal, lightDir), 0.0);
+	vec3 diffuse = diff * pointLight.color;
+	
+	float ambientStrength = 0.1;
+	vec3 ambientLight = ambientStrength * pointLight.color;
+	
+	float specularStrength = 0.5;
+	vec3 reflectDir = reflect(-lightDir, normal);
+	float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 128.0);
+	vec3 specularLight = specularStrength * spec * pointLight.color;
+
+	return diffuse + ambientLight + specularLight;
 }
 
 #endif
