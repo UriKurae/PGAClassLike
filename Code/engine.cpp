@@ -772,7 +772,7 @@ void Gui(App* app)
         {
             if (app->shadingType == ShadingType::FORWARD)
             {
-                const char* items[] = { "Albedo", "Normals" , "Position", "Depth", "Specular" };
+                const char* items[] = { "Albedo", "Normals" , "Position", "Specular", "Depth" };
                 static int itemCurrent = 0;
                 ImGui::Text("Select Desired:");
                 ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items));
@@ -1156,10 +1156,6 @@ void DrawForwardRendering(App* app)
 
         glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
         break;
-    case RenderTarget::RENDER_DEPTH:
-
-        glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
-        break;
     case RenderTarget::RENDER_POSITION:
 
         glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
@@ -1167,6 +1163,10 @@ void DrawForwardRendering(App* app)
     case RenderTarget::RENDER_SPECULAR:
 
         glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
+        break;
+    case RenderTarget::RENDER_DEPTH:
+
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->depthAttachmentId);
         break;
     }
 

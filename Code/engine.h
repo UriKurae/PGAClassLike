@@ -101,8 +101,8 @@ enum class RenderTarget
     RENDER_ALBEDO = 0,
     RENDER_NORMALS,
     RENDER_POSITION,
-    RENDER_DEPTH,
-    RENDER_SPECULAR
+    RENDER_SPECULAR,
+    RENDER_DEPTH
 };
 
 enum class ShadingType

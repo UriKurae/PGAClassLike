@@ -28,6 +28,15 @@ uniform int renderTarget;
 
 layout(location=0) out vec4 oColor;
 
+float near = 0.1; 
+float far  = 100.0; 
+  
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main()
 {
 	
@@ -44,11 +53,14 @@ void main()
 	    oColor = texture(screenTexture, TexCoords);
 	 break;
 	 case 3:
-		float depth = texture(screenTexture, TexCoords).r;
-		oColor = vec4(vec3(depth), 1.0);
+		oColor = vec4(vec3(texture(screenTexture, TexCoords).a), 1.0);
+		//oColor = vec4(1.0, 0.0, 1.0, 1.0);
 	 break;
 	 case 4:
-		oColor = vec4(vec3(texture(screenTexture, TexCoords).r), 1.0);
+		// First is regular depth, second is linear one
+		//float depth = texture(screenTexture, TexCoords).r;
+		float depth = LinearizeDepth(texture(screenTexture, TexCoords).r) / far; // divide by far for demonstration
+		oColor = vec4(vec3(depth), 1.0);
 	 break;
 	}
 	

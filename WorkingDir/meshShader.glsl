@@ -60,8 +60,7 @@ layout(binding = 0, std140) uniform GlobalParams
 layout(location=0) out vec4 albedoColor;
 layout(location=1) out vec4 normalColor;
 layout(location=2) out vec4 positionColor;
-layout(location=3) out vec4 depthColor;
-layout(location=4) out vec4 specularColor;
+layout(location=3) out vec4 specularColor;
 
 vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection);
 vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection);
@@ -98,9 +97,8 @@ void main()
 	// Store albedo color
 	albedoColor.rgb = textureColor.rgb;
 
-	// Store Normal, depth and position
 	normalColor = vec4(vec3(vNormal), 1.0);
-	depthColor = vec4(vec3(texture(uTexture, vTexCoord).z), 1.0);
+
 	positionColor = vec4(vPosition, 1.0);
 
 	// Store albedo and specular component
