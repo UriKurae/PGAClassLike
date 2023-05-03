@@ -1063,7 +1063,7 @@ void Render(App* app)
             glUseProgram(0);
             app->framebuffer->Unbind();
 
-            app->QuadFramebuffer->Bind();
+            //app->QuadFramebuffer->Bind();
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -1085,7 +1085,7 @@ void Render(App* app)
             DrawQuadVao(app);
 
             glUseProgram(0);      
-            app->QuadFramebuffer->Unbind();
+            //app->QuadFramebuffer->Unbind();
         }
             break;
 
