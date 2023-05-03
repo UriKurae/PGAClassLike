@@ -103,7 +103,10 @@ void main()
 
 	// Store albedo and specular component
 	specularColor.rgb = texture(uTexture, vTexCoord).rgb;
-	specularColor.a = texture(uTexture, vTexCoord).r;
+	
+	// If there's texture use the first one, if not, the second
+	//specularColor.a = texture(uTexture, vTexCoord).r;
+	specularColor.a = 0.5;
 }
 
 vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection)

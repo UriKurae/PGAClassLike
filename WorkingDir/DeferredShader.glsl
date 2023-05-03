@@ -79,10 +79,9 @@ void main()
 			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
 			
 			// Specular light
-			float specularStrength = 0.5;
 			vec3 reflectDir = reflect(-lightDir, Normal);
-			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-			vec3 specularLight = vec3(Specular * specularStrength * spec);
+			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
+			vec3 specularLight =  vec3(Specular * spec);
 			
 			
 			lighting += ambient + diffuse + specularLight;
@@ -95,10 +94,9 @@ void main()
 			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
 	
 			// Specular light
-			float specularStrength = 0.5;
 			vec3 reflectDir = reflect(-lightDir, Normal);
-			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-			vec3 specularLight = vec3(Specular * specularStrength * spec);
+			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
+			vec3 specularLight =  vec3(Specular * spec);
 			
 			lighting += ambient + diffuse + specularLight;
 		}

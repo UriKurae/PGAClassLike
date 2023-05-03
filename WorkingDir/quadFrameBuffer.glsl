@@ -54,7 +54,6 @@ void main()
 	 break;
 	 case 3:
 		oColor = vec4(vec3(texture(screenTexture, TexCoords).a), 1.0);
-		//oColor = vec4(1.0, 0.0, 1.0, 1.0);
 	 break;
 	 case 4:
 		// First is regular depth, second is linear one
