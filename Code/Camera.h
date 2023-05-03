@@ -11,6 +11,7 @@ public:
 
 	void Update(Input& input, float dt);
 	void UpdateFov(float newFov);
+	void Recalculate(int w, int h);
 
 	glm::mat4& GetView() { return view; }
 	glm::mat4& GetProjection() { return projection; }

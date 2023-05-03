@@ -606,8 +606,13 @@ void Init(App* app)
     
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
 
+    // First pass framebuffer
     std::vector<int> attachments = { GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
     app->framebuffer = std::make_shared<FrameBuffer>(app->displaySize, attachments);
+
+    // Second pass for the quad and generating the ImGui Image
+    attachments = { GL_RGBA16F };
+    app->QuadFramebuffer = std::make_shared<FrameBuffer>(app->displaySize, attachments);
 
     // Get max uniform size allowed for uniform buffers
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
@@ -909,8 +914,12 @@ void Gui(App* app)
         ImGui::End();
     }
     
-    //ImGui::Image(app->renderTarget);
-    
+    //ImGui::Begin("Viewport");
+    //u32 textureID = app->QuadFramebuffer->colorAttachments[0];
+    //ImGui::Image((void*)textureID, ImVec2{ (float)app->displaySize.x, (float)app->displaySize.y }, ImVec2{ 0, 1}, ImVec2{ 1, 0 });
+    //ImGui::End();
+
+
     // TODO: Uncomment for OpenGL info.
     //ImGui::OpenPopup("OpenGL Info");
     if (ImGui::BeginPopup("OpenGL Info"))
@@ -1054,9 +1063,12 @@ void Render(App* app)
             glUseProgram(0);
             app->framebuffer->Unbind();
 
+            app->QuadFramebuffer->Bind();
+
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-            
+            glDisable(GL_DEPTH_TEST);
+
             switch (app->shadingType)
             {
             case ShadingType::FORWARD:
@@ -1070,12 +1082,10 @@ void Render(App* app)
                 ELOG("There must be a type of shading method selected!");
             }
             
-            
-            glDisable(GL_DEPTH_TEST);
             DrawQuadVao(app);
 
             glUseProgram(0);      
-            
+            app->QuadFramebuffer->Unbind();
         }
             break;
 

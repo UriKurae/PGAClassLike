@@ -122,6 +122,7 @@ FrameBuffer::~FrameBuffer()
 
 void FrameBuffer::SetupFrameBuffer(glm::vec2 displaySize, std::vector<int> attachments)
 {
+	fbSpecifications = attachments;
 	for (int i = 0; i < attachments.size(); ++i)
 	{
 		u32 attachmentId = 0;
@@ -211,6 +212,13 @@ void FrameBuffer::SetupFrameBuffer(glm::vec2 displaySize, std::vector<int> attac
 
 }
 
+void FrameBuffer::DeleteFrameBuffers()
+{
+	glDeleteFramebuffers(1, &rendererID);
+	glDeleteTextures(colorAttachments.size(), colorAttachments.data());
+	glDeleteTextures(1, &depthAttachmentId);
+}
+
 void FrameBuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, rendererID);
@@ -224,4 +232,10 @@ void FrameBuffer::Unbind()
 void FrameBuffer::DrawAttachments(u32 count, u32 attachments[])
 {
 	glDrawBuffers(count, attachments);
+}
+
+void FrameBuffer::Resize(glm::vec2 newDisplaySize)
+{
+	DeleteFrameBuffers();
+	SetupFrameBuffer(newDisplaySize, fbSpecifications);
 }

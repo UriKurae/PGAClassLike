@@ -132,8 +132,9 @@ struct App
     // Camera
     std::shared_ptr<EditorCamera> camera;
 
-    // Framebuffer
+    // Framebuffers
     std::shared_ptr<FrameBuffer> framebuffer;
+    std::shared_ptr<FrameBuffer> QuadFramebuffer;
 
     // Framebuffer image shader
     u32 quadFBshader;

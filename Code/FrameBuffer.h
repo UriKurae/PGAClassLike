@@ -12,6 +12,7 @@ public:
 	void Unbind();
 
 	void DrawAttachments(u32 count, u32 attachments[]);
+	void Resize(glm::vec2 newDisplaySize);
 
 public:
 	u32 colorAttachmentAlbedoId;
@@ -25,9 +26,8 @@ public:
 private:
 	//void SetupFrameBuffer(glm::vec2 displaySize);
 	void SetupFrameBuffer(glm::vec2 displaySize, std::vector<int> attachments);
-
+	void DeleteFrameBuffers();
 private:
 	
-
-	
+	std::vector<int> fbSpecifications;
 };

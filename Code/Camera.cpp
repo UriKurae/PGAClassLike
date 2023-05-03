@@ -41,3 +41,18 @@ void EditorCamera::UpdateFov(float newFov)
 {
 	projection = glm::perspective(glm::radians(newFov), float(width) / (float)height, nearPlane, farPlane);
 }
+
+void EditorCamera::Recalculate(int w, int h)
+{
+	// Setup camera position, front and up
+	cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
+	camFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	// Get view and projection matrix 
+	view = glm::lookAt(cameraPos, cameraPos + camFront, camUp);
+	projection = glm::perspective(glm::radians(80.0f), float(w) / (float)h, nearPlane, farPlane);
+
+	width = w;
+	height = h;
+}
