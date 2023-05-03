@@ -112,6 +112,7 @@ void main()
 vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection)
 {
 	vec3 lightDir = normalize(dirLight.direction);
+	
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = diff * dirLight.color;
 	

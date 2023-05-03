@@ -73,32 +73,32 @@ void main()
 		{
 			vec3 lightDir = normalize(uLight[i].direction);
 			
-			vec3 ambient = Diffuse * 0.1;
+			vec3 ambient = uLight[i].color * 0.1;
 
 			// Diffuse light
-			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
+			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color;
 			
 			// Specular light
 			vec3 reflectDir = reflect(-lightDir, Normal);
 			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
-			vec3 specularLight =  vec3(Specular * spec);
+			vec3 specularLight = Specular * spec * uLight[i].color;
 			
 			
-			lighting += ambient + diffuse + specularLight;
+			lighting += (ambient + diffuse + specularLight) * Diffuse;
 		}
 		else if (uLight[i].type == 1)
 		{
-			vec3 ambient = Diffuse * 0.1;
+			vec3 ambient = 0.1 * uLight[i].color;
 
 			vec3 lightDir = normalize(uLight[i].position - FragPos);
-			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * uLight[i].color;
+			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color;
 	
 			// Specular light
 			vec3 reflectDir = reflect(-lightDir, Normal);
 			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
-			vec3 specularLight =  vec3(Specular * spec);
+			vec3 specularLight = Specular * spec * uLight[i].color;
 			
-			lighting += ambient + diffuse + specularLight;
+			lighting += (ambient + diffuse + specularLight) * Diffuse;
 		}
 		
 	}
