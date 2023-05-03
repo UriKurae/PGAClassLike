@@ -45,10 +45,11 @@ layout(binding = 0, std140) uniform GlobalParams
 
 layout(location=0) out vec4 oColor;
 
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
+
 uniform sampler2D gColor;
+uniform sampler2D gNormal;
+uniform sampler2D gPosition;
+uniform sampler2D gAlbedoSpec;
 
 
 void main()

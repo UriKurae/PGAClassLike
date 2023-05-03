@@ -606,7 +606,8 @@ void Init(App* app)
     
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
 
-    app->framebuffer = std::make_shared<FrameBuffer>(app->displaySize);
+    std::vector<int> attachments = { GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
+    app->framebuffer = std::make_shared<FrameBuffer>(app->displaySize, attachments);
 
     // Get max uniform size allowed for uniform buffers
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
@@ -766,6 +767,9 @@ void Init(App* app)
 
 void Gui(App* app)
 {
+    // Enable docking
+    //ImGui::DockSpaceOverViewport();
+
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Render Targets"))
@@ -905,6 +909,7 @@ void Gui(App* app)
         ImGui::End();
     }
     
+    //ImGui::Image(app->renderTarget);
     
     // TODO: Uncomment for OpenGL info.
     //ImGui::OpenPopup("OpenGL Info");
@@ -1150,19 +1155,19 @@ void DrawForwardRendering(App* app)
     {
     case RenderTarget::RENDER_ALBEDO:
 
-        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentAlbedoId);
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[0]);
         break;
     case RenderTarget::RENDER_NORMALS:
 
-        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[1]);
         break;
     case RenderTarget::RENDER_POSITION:
 
-        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[2]);
         break;
     case RenderTarget::RENDER_SPECULAR:
 
-        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
+        glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[3]);
         break;
     case RenderTarget::RENDER_DEPTH:
 
@@ -1181,27 +1186,27 @@ void DrawDeferredRendering(App* app)
     Program& quadShader = app->programs[app->quadDeferredShader];
     glUseProgram(quadShader.handle);
 
-    u32 colorLocation = glGetUniformLocation(quadShader.handle, "gPosition");
+    u32 colorLocation = glGetUniformLocation(quadShader.handle, "gColor");
     glUniform1i(colorLocation, 0);
 
     colorLocation = glGetUniformLocation(quadShader.handle, "gNormal");
     glUniform1i(colorLocation, 1);
 
-    colorLocation = glGetUniformLocation(quadShader.handle, "gAlbedoSpec");
+    colorLocation = glGetUniformLocation(quadShader.handle, "gPosition");
     glUniform1i(colorLocation, 2);
 
-    colorLocation = glGetUniformLocation(quadShader.handle, "gColor");
+    colorLocation = glGetUniformLocation(quadShader.handle, "gAlbedoSpec");
     glUniform1i(colorLocation, 3);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentPositionId);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[0]);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentNormalsId);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[1]);
     
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentSpecularId);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[2]);
 
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachmentAlbedoId);
+    glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[3]);
 }
