@@ -716,9 +716,13 @@ void Init(App* app)
     // Mesh Program
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
+    //app->model = LoadModel(app, "Patrick/Patrick.obj");
+    //u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
+    //u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
     app->model = LoadModel(app, "Backpack/backpack.obj");
     u32 model2 = LoadModel(app, "Backpack/backpack.obj");
     u32 model3 = LoadModel(app, "Backpack/backpack.obj");
+  
     
     
     Entity ent = {};
@@ -750,6 +754,7 @@ void Init(App* app)
  
     // Load model texture and get texture ID from the vectors of textures.
     app->modelTexture = LoadTexture2D(app, "Backpack/diffuse.jpg");
+
     // Get uniform location from the texture for later use
     app->modelShaderTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "uTexture");
     
@@ -1113,7 +1118,10 @@ void RenderModels(App* app, Program shaderModel)
 
             glUniform1i(app->modelShaderTextureUniformLocation, 0);
             glActiveTexture(GL_TEXTURE0);
+            // This is for Backpack
             GLuint textureHandle = app->textures[app->modelTexture].handle;
+            // This for patrick
+            //GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
             glBindTexture(GL_TEXTURE_2D, textureHandle);
 
             Submesh& submesh = mesh.submeshes[j];
