@@ -668,16 +668,16 @@ void Init(App* app)
     Light light;
     light.type = LightType::LightType_Directional;
     light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    light.direction = glm::vec3(-1.0f);
-    light.color = glm::vec3(0.0f, 0.0f, 0.0f);
+    light.direction = glm::vec3(-5.0f, 1.0f, -1.0f);
+    light.color = glm::vec3(1.0f);
 
     app->lights.push_back(light);
 
     Light light2;
     light2.type = LightType::LightType_Directional;
     light2.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    light2.direction = glm::vec3(1.0f);
-    light2.color = glm::vec3(0.4f, 0.0f, 0.4f);
+    light2.direction = glm::vec3(5.0f, 1.0f, -1.0f);
+    light2.color = glm::vec3(1.0f);
 
     app->lights.push_back(light2);
 

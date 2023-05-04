@@ -67,8 +67,8 @@ vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection);
 
 void main()
 {
-	vec4 textureColor = texture(uTexture, vTexCoord);
-
+	vec3 diffuse = texture(uTexture, vTexCoord).rgb;
+	vec3 finalLight = vec3(0.0);
 	if (renderMode == 0)
 	{
 		for (int i = 0; i < uLightCount; ++i)
@@ -78,24 +78,24 @@ void main()
 				vec3 norm = normalize(vNormal);
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 				
-				vec3 finalLight = CalcDirLight(norm, uLight[i], viewDir);
+				finalLight += CalcDirLight(norm, uLight[i], viewDir) * diffuse;
 
-				textureColor.rgb += finalLight * textureColor.rgb;
+				
 			}
 			else if (uLight[i].type == 1)
 			{
 				vec3 norm = normalize(vNormal);
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 
-				vec3 finalLight = CalcPointLight(norm, uLight[i], viewDir);
+				finalLight += CalcPointLight(norm, uLight[i], viewDir) * diffuse;
 
-				textureColor.rgb += finalLight * textureColor.rgb;
+				
 				
 			}
 		}
 	}	
 	// Store albedo color
-	albedoColor.rgb = textureColor.rgb;
+	albedoColor = vec4(finalLight, 1.0);
 
 	normalColor = vec4(vec3(vNormal), 1.0);
 
