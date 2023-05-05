@@ -206,7 +206,7 @@ void FrameBuffer::SetupFrameBuffer(glm::vec2 displaySize, std::vector<int> attac
 		attachmentsDraw.push_back(GL_COLOR_ATTACHMENT0 + i);
 	}
 	
-	glDrawBuffers(4, attachmentsDraw.data());
+	glDrawBuffers(attachmentsDraw.size(), attachmentsDraw.data());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
