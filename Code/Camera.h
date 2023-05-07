@@ -22,6 +22,12 @@ private:
 	glm::vec3 cameraPos;
 	
 	float cameraSpeed = 2.5f;
+	float cameraSprint = 1.0f;
+	float cameraSpeedMultiplier = 3.0f;
+	float sensitivity = 0.03f;
+
+	float yaw;
+	float pitch;
 
 	glm::vec3 camUp;
 	glm::vec3 camFront;
