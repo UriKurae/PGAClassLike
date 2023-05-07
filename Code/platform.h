@@ -33,6 +33,8 @@ typedef double                 f64;
 enum MouseButton {
     LEFT,
     RIGHT,
+    MIDDLE,
+    SCROLL,
     MOUSE_BUTTON_COUNT
 };
 
@@ -49,7 +51,9 @@ enum ButtonState {
     BUTTON_IDLE,
     BUTTON_PRESS,
     BUTTON_PRESSED,
-    BUTTON_RELEASE
+    BUTTON_RELEASE,
+    BUTTON_SCROLL_DOWN,
+    BUTTON_SCROLL_UP
 };
 
 struct Input {

@@ -54,18 +54,28 @@ void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
             switch (button) {
                 case GLFW_MOUSE_BUTTON_RIGHT: app->input.mouseButtons[RIGHT] = BUTTON_PRESS; break;
                 case GLFW_MOUSE_BUTTON_LEFT:  app->input.mouseButtons[LEFT]  = BUTTON_PRESS; break;
+                case GLFW_MOUSE_BUTTON_MIDDLE:  app->input.mouseButtons[MIDDLE]  = BUTTON_PRESS; break;
             } break;
         case GLFW_RELEASE:
             switch (button) {
                 case GLFW_MOUSE_BUTTON_RIGHT: app->input.mouseButtons[RIGHT] = BUTTON_RELEASE; break;
                 case GLFW_MOUSE_BUTTON_LEFT:  app->input.mouseButtons[LEFT]  = BUTTON_RELEASE; break;
+                case GLFW_MOUSE_BUTTON_MIDDLE:  app->input.mouseButtons[MIDDLE]  = BUTTON_RELEASE; break;
             } break;
     }
 }
 
 void OnGlfwScrollEvent(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // Nothing do yet... maybe zoom in/out in the future?
+    App* app = (App*)glfwGetWindowUserPointer(window);
+    if (yoffset >= 1.0f)
+    {
+        app->input.mouseButtons[SCROLL] = BUTTON_SCROLL_UP;
+    }
+    else if (yoffset <= -1.0f)
+    {
+        app->input.mouseButtons[SCROLL] = BUTTON_SCROLL_DOWN;
+    }
 }
 
 void OnGlfwKeyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -266,7 +276,10 @@ int main()
 
         // Reset frame allocator
         GlobalFrameArenaHead = 0;
+
+        app.input.mouseButtons[SCROLL] = BUTTON_RELEASE;
     }
+
 
     free(GlobalFrameArenaMemory);
 

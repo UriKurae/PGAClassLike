@@ -809,6 +809,31 @@ void Gui(App* app)
             app->shadingType = (ShadingType)currentRenderMode;
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("Utils"))
+        {
+            static float speed = 10.0f;
+            ImGui::Text("Camera Speed");
+            ImGui::SliderFloat("##Camera Speed", &speed, 0.1f, 100.0f, "%.2f");
+            app->camera->SetCameraSpeed(speed);
+
+            static float zoomSpeed = 40.0f;
+            ImGui::Text("Zoom Speed");
+            ImGui::SliderFloat("##Zoom Speed", &zoomSpeed, 0.1f, 100.0f, "%.2f");
+            app->camera->SetCameraZoomSpeed(zoomSpeed);
+
+            static float MouseSensitivity = 1.0f;
+            ImGui::Text("Mouse Sensitivity");
+            ImGui::SliderFloat("##Sensitivity", &MouseSensitivity, 0.1f, 100.0f, "%.2f");
+            app->camera->SetMouseSensitivity(MouseSensitivity);
+
+            static float fov = 80.0f;
+            ImGui::Text("Field Of View");
+            ImGui::SliderFloat("##Field Of View", &fov, 60.0f, 160.0f, "%.2f");
+            app->camera->UpdateFov(fov);
+
+            ImGui::EndMenu();
+        }
        
         ImGui::EndMainMenuBar();
     }
@@ -910,10 +935,11 @@ void Gui(App* app)
             break;
         }
 
-        if (ImGui::CollapsingHeader("Color Picker"))
-        {
-            ImGui::ColorPicker3("Light Color", &light.color[0]);
-        }
+        ImGui::Text("Color");
+        ImGui::SameLine();
+        ImGui::ColorEdit4("##Color", &light.color[0], ImGuiColorEditFlags_NoInputs);
+
+        ImGui::Separator();
 
         ImGui::PopID();
         ImGui::End();
