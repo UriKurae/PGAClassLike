@@ -160,6 +160,7 @@ struct App
 
     // Lights
     std::vector<Light> lights;
+    u32 lightShader;
 
     // --------- Uniform buffers mesh Shader ---------
     // Uniform buffers size and alignment
@@ -223,3 +224,4 @@ void DrawQuadVao(App* app);
 void DrawForwardRendering(App* app);
 
 void DrawDeferredRendering(App* app);
+

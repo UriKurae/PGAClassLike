@@ -602,6 +602,8 @@ void Init(App* app)
 
     app->quadFBshader = LoadProgram(app, "quadFrameBuffer.glsl", "QUAD_FRAMEBUFFER");
 
+    app->lightShader = LoadProgram(app, "lightShader.glsl", "LIGHT_SHADER");
+
     app->quadDeferredShader = LoadProgram(app, "DeferredShader.glsl", "QUAD_DEFERRED");
     
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
@@ -667,17 +669,19 @@ void Init(App* app)
     // ------- Directional Lights -------
     Light light;
     light.type = LightType::LightType_Directional;
-    light.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    light.direction = glm::vec3(-5.0f, 1.0f, -1.0f);
-    light.color = glm::vec3(1.0f);
+    light.position = glm::vec3(-8.0f, 5.0f, 0.0f);
+    light.direction = glm::vec3(1.0f);
+    light.color = glm::vec3(1.0f, 1.0f, 0.0f);
+    light.model = LoadModel(app, "Primitives/plane.fbx");
 
     app->lights.push_back(light);
 
     Light light2;
     light2.type = LightType::LightType_Directional;
-    light2.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    light2.direction = glm::vec3(5.0f, 1.0f, -1.0f);
-    light2.color = glm::vec3(1.0f);
+    light2.position = glm::vec3(8.0f, 5.0f, 0.0f);
+    light2.direction = glm::vec3(1.0f, 1.0f, -1.0f);
+    light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
+    light2.model = LoadModel(app, "Primitives/plane.fbx");
 
     app->lights.push_back(light2);
 
@@ -689,23 +693,28 @@ void Init(App* app)
     light3.type = LightType::LightType_Point;
     light3.position = glm::vec3(0.0f, 0.0f, 1.0f);
     light3.direction = glm::vec3(1.0f);
-    light3.color = glm::vec3(0.4f, 0.0f, 0.4f);
+    light3.color = glm::vec3(0.0f, 1.0f, 0.0f);
+    light3.model = LoadModel(app, "Primitives/sphere.fbx");
 
     app->lights.push_back(light3);
 
     Light light4;
     light4.type = LightType::LightType_Point;
-    light4.position = glm::vec3(5.0f, 0.0f, 1.0f);
+    light4.position = glm::vec3(4.0f, 0.0f, 1.0f);
     light4.direction = glm::vec3(1.0f);
-    light4.color = glm::vec3(0.4f, 0.0f, 0.4f);
+    light4.color = glm::vec3(0.0f, 0.0f, 1.0f);
+    light4.model = LoadModel(app, "Primitives/sphere.fbx");
+
 
     app->lights.push_back(light4);
 
     Light light5;
     light5.type = LightType::LightType_Point;
-    light5.position = glm::vec3(-5.0f, 0.0f, 1.0f);
+    light5.position = glm::vec3(-4.0f, 0.0f, 1.0f);
     light5.direction = glm::vec3(1.0f);
-    light5.color = glm::vec3(0.4f, 0.0f, 0.4f);
+    light5.color = glm::vec3(1.0f, 0.0f, 0.0f);
+    light5.model = LoadModel(app, "Primitives/sphere.fbx");
+
 
     app->lights.push_back(light5);
     // ------- Point Lights End -------
@@ -932,18 +941,31 @@ void Gui(App* app)
         }
         case LightType::LightType_Directional:
             ImGui::Text("Light %d (Directional)", i);
-            ImGui::Text("Rotation:");
+           
             float windowWidth = ImGui::GetContentRegionAvailWidth();
             ImGui::PushItemWidth(50.0f);
+            ImGui::Text("Position:");
             ImGui::SameLine();
-            ImGui::DragFloat("##DirX", &light.direction.x, 0.1f);
+            ImGui::DragFloat("##PosX", &light.position.x, 0.1f);
 
             ImGui::SameLine();
-            ImGui::DragFloat("##DirY", &light.direction.y, 0.1f);
+            ImGui::DragFloat("##PosY", &light.position.y, 0.1f);
 
             ImGui::SameLine();
-            ImGui::DragFloat("##DirZ", &light.direction.z, 0.1f);
+            ImGui::DragFloat("##PosZ", &light.position.z, 0.1f);
 
+            ImGui::Text("Rotation:");
+           
+            ImGui::SameLine();
+           
+            ImGui::DragFloat("##DirX", &light.direction.x, 0.05f, -1.0f, 1.0f);
+
+            ImGui::SameLine();
+            ImGui::DragFloat("##DirY", &light.direction.y, 0.05f, -1.0f, 1.0f);
+
+            ImGui::SameLine();
+            ImGui::DragFloat("##DirZ", &light.direction.z, 0.05f, -1.0f, 1.0f);
+         
             break;
         }
 
@@ -1095,18 +1117,31 @@ void Render(App* app)
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            // ------ Model Render ------
             Program& shaderModel = app->programs[app->modelShaderID];
             glUseProgram(shaderModel.handle);
 
             u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
             glUniform1i(renderModeUniform, (int)app->renderTarget);
 
-            RenderLights(app, shaderModel);
             RenderModels(app, shaderModel);
-           
+            
             glUseProgram(0);
-            app->framebuffer->Unbind();
+            // ------ Model Render End ------
 
+            // ------ Light Render ------
+            Program& shaderLight = app->programs[app->lightShader];
+            glUseProgram(shaderLight.handle);
+            
+            RenderLights(app, shaderLight);
+            
+            glUseProgram(0);
+            // ------ Light Render End ------
+
+            app->framebuffer->Unbind();
+            // First Pass end
+
+            // Second Pass
             app->QuadFramebuffer->Bind();
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1130,6 +1165,7 @@ void Render(App* app)
 
             glUseProgram(0);      
             app->QuadFramebuffer->Unbind();
+            // Second Pass End
         }
             break;
 
@@ -1172,8 +1208,35 @@ void RenderModels(App* app, Program shaderModel)
 
 void RenderLights(App* app, Program shaderModel)
 {
+    u32 lightShaderUniform = glGetUniformLocation(shaderModel.handle, "view");
+    glUniformMatrix4fv(lightShaderUniform, 1, GL_FALSE, glm::value_ptr(app->camera->GetView()));
+    lightShaderUniform = glGetUniformLocation(shaderModel.handle, "projection");
+    glUniformMatrix4fv(lightShaderUniform, 1, GL_FALSE, glm::value_ptr(app->camera->GetProjection()));
+
     // Bind buffer handle
     glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+    for (u32 i = 0; i < app->lights.size(); ++i)
+    {
+        Light& light = app->lights[i];
+        Model& model = app->models[light.model];
+        Mesh& mesh = app->meshes[model.meshIdx];
+
+        lightShaderUniform = glGetUniformLocation(shaderModel.handle, "model");
+        glUniformMatrix4fv(lightShaderUniform, 1, GL_FALSE, glm::value_ptr(light.GetTransformMat()));
+
+        lightShaderUniform = glGetUniformLocation(shaderModel.handle, "lightColor");
+        glUniform3f(lightShaderUniform, light.color.x, light.color.y, light.color.z);
+
+        for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+        {
+            u32 vao = FindVao(mesh, j, shaderModel);
+            glBindVertexArray(vao);
+
+            Submesh& submesh = mesh.submeshes[j];
+            glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+            glBindVertexArray(0);
+        }
+    }
 }
 
 void GenerateQuadVao(App* app)
