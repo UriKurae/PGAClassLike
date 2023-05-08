@@ -778,7 +778,7 @@ void Init(App* app)
 void Gui(App* app)
 {
     // Enable docking
-    //ImGui::DockSpaceOverViewport();
+    ImGui::DockSpaceOverViewport();
 
     if (ImGui::BeginMainMenuBar())
     {
@@ -932,6 +932,18 @@ void Gui(App* app)
         }
         case LightType::LightType_Directional:
             ImGui::Text("Light %d (Directional)", i);
+            ImGui::Text("Rotation:");
+            float windowWidth = ImGui::GetContentRegionAvailWidth();
+            ImGui::PushItemWidth(50.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##DirX", &light.direction.x, 0.1f);
+
+            ImGui::SameLine();
+            ImGui::DragFloat("##DirY", &light.direction.y, 0.1f);
+
+            ImGui::SameLine();
+            ImGui::DragFloat("##DirZ", &light.direction.z, 0.1f);
+
             break;
         }
 
@@ -945,10 +957,11 @@ void Gui(App* app)
         ImGui::End();
     }
     
-    //ImGui::Begin("Viewport");
-    //u32 textureID = app->QuadFramebuffer->colorAttachments[0];
-    //ImGui::Image((void*)textureID, ImVec2{ (float)app->displaySize.x, (float)app->displaySize.y }, ImVec2{ 0, 1}, ImVec2{ 1, 0 });
-    //ImGui::End();
+    static bool opened = true;
+    ImGui::Begin("Viewport", &opened, ImGuiWindowFlags_NoScrollbar);
+    u32 textureID = app->QuadFramebuffer->colorAttachments[0];
+    ImGui::Image((void*)textureID, ImVec2{ (float)app->displaySize.x, (float)app->displaySize.y }, ImVec2{ 0, 1}, ImVec2{ 1, 0 });
+    ImGui::End();
 
 
     // TODO: Uncomment for OpenGL info.
@@ -1094,7 +1107,7 @@ void Render(App* app)
             glUseProgram(0);
             app->framebuffer->Unbind();
 
-            //app->QuadFramebuffer->Bind();
+            app->QuadFramebuffer->Bind();
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -1116,7 +1129,7 @@ void Render(App* app)
             DrawQuadVao(app);
 
             glUseProgram(0);      
-            //app->QuadFramebuffer->Unbind();
+            app->QuadFramebuffer->Unbind();
         }
             break;
 
