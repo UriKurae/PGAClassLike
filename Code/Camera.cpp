@@ -103,11 +103,17 @@ void EditorCamera::MouseMovement(Input& input, float dt)
 		float offsetX = -input.mouseDelta.x * sensitivity * dt;
 		float offsetY = -input.mouseDelta.y * sensitivity * dt;
 
-		glm::vec3 angles = glm::vec3(offsetY, offsetX, 0.0f);
-		glm::quat rotation = glm::quat(angles);
+		glm::vec3 euler;
+
+		if (cameraPos.z >= 0.0f)
+			euler = glm::vec3(offsetY, offsetX, 0.0f);
+		else if (cameraPos.z < 0.0f)
+			euler = glm::vec3(-offsetY, offsetX, 0.0f);
+
+		glm::quat rotate = glm::quat(euler);
 
 
-		camFront = glm::normalize(rotation * camFront);
+		camFront = glm::normalize(rotate * camFront);
 	}
 
 	if (input.mouseButtons[MouseButton::SCROLL] == BUTTON_SCROLL_UP)
