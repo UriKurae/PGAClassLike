@@ -1208,10 +1208,8 @@ void RenderModels(App* app, Program shaderModel)
 
 void RenderLights(App* app, Program shaderModel)
 {
-    u32 lightShaderUniform = glGetUniformLocation(shaderModel.handle, "view");
-    glUniformMatrix4fv(lightShaderUniform, 1, GL_FALSE, glm::value_ptr(app->camera->GetView()));
-    lightShaderUniform = glGetUniformLocation(shaderModel.handle, "projection");
-    glUniformMatrix4fv(lightShaderUniform, 1, GL_FALSE, glm::value_ptr(app->camera->GetProjection()));
+    app->uniformUploader.UploadUniformMat4(shaderModel, "view", app->camera->GetView());
+    app->uniformUploader.UploadUniformMat4(shaderModel, "projection", app->camera->GetProjection());
 
     // Bind buffer handle
     glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
@@ -1221,11 +1219,9 @@ void RenderLights(App* app, Program shaderModel)
         Model& model = app->models[light.model];
         Mesh& mesh = app->meshes[model.meshIdx];
 
-        lightShaderUniform = glGetUniformLocation(shaderModel.handle, "model");
-        glUniformMatrix4fv(lightShaderUniform, 1, GL_FALSE, glm::value_ptr(light.GetTransformMat()));
-
-        lightShaderUniform = glGetUniformLocation(shaderModel.handle, "lightColor");
-        glUniform3f(lightShaderUniform, light.color.x, light.color.y, light.color.z);
+        app->uniformUploader.UploadUniformMat4(shaderModel, "model", light.GetTransformMat());
+        app->uniformUploader.UploadUniformFloat3(shaderModel, "lightColor", light.color);
+        
 
         for (u32 j = 0; j < mesh.submeshes.size(); ++j)
         {

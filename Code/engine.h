@@ -40,6 +40,51 @@ struct Program
     VertexShaderLayout vertexInputLayout;
 };
 
+struct BasicUniformUploader
+{
+    void UploadUniformInt(Program& shader, const std::string& name, int value)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniform1i(location, value);
+    }
+
+    void UploadUniformFloat(Program& shader, const std::string& name, float value)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniform1f(location, value);
+    }
+
+    void UploadUniformFloat2(Program& shader, const std::string& name, const glm::vec2& values)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniform2f(location, values.x, values.y);
+    }
+
+    void UploadUniformFloat3(Program& shader, const std::string& name, const glm::vec3& values)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniform3f(location, values.x, values.y, values.z);
+    }
+
+    void UploadUniformFloat4(Program& shader, const std::string& name, const glm::vec4& values)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniform4f(location, values.x, values.y, values.z, values.w);
+    }
+
+    void UploadUniformMat3(Program& shader, const std::string& name, const glm::mat3& matrix)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+
+    void UploadUniformMat4(Program& shader, const std::string& name, const glm::mat4& matrix)
+    {
+        GLint location = glGetUniformLocation(shader.handle, name.c_str());
+        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+};
+
 enum class Mode
 {
     Mode_TexturedQuad,
@@ -154,6 +199,9 @@ struct App
     u32 modelShaderID;
     u32 modelShaderTextureUniformLocation;
     u32 modelTexture;
+
+    // Uniforms helper
+    BasicUniformUploader uniformUploader;
 
     // Entities
     std::vector<Entity> entities;
