@@ -79,8 +79,6 @@ void main()
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 				
 				finalLight += CalcDirLight(norm, uLight[i], viewDir) * diffuse;
-
-				
 			}
 			else if (uLight[i].type == 1)
 			{
@@ -88,9 +86,6 @@ void main()
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 
 				finalLight += CalcPointLight(norm, uLight[i], viewDir) * diffuse;
-
-				
-				
 			}
 		}
 	}	

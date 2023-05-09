@@ -670,7 +670,7 @@ void Init(App* app)
     Light light;
     light.type = LightType::LightType_Directional;
     light.position = glm::vec3(-8.0f, 5.0f, 0.0f);
-    light.direction = glm::vec3(1.0f);
+    light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
     light.color = glm::vec3(1.0f, 1.0f, 0.0f);
     light.model = LoadModel(app, "Primitives/plane.fbx");
 
@@ -679,7 +679,7 @@ void Init(App* app)
     Light light2;
     light2.type = LightType::LightType_Directional;
     light2.position = glm::vec3(8.0f, 5.0f, 0.0f);
-    light2.direction = glm::vec3(1.0f, 1.0f, -1.0f);
+    light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
     light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
     light2.model = LoadModel(app, "Primitives/plane.fbx");
 
@@ -954,7 +954,7 @@ void Gui(App* app)
             ImGui::SameLine();
             ImGui::DragFloat("##PosZ", &light.position.z, 0.1f);
 
-            ImGui::Text("Rotation:");
+            ImGui::Text("Direction:");
            
             ImGui::SameLine();
            
@@ -1129,14 +1129,6 @@ void Render(App* app)
             glUseProgram(0);
             // ------ Model Render End ------
 
-            // ------ Light Render ------
-            Program& shaderLight = app->programs[app->lightShader];
-            glUseProgram(shaderLight.handle);
-            
-            RenderLights(app, shaderLight);
-            
-            glUseProgram(0);
-            // ------ Light Render End ------
 
             app->framebuffer->Unbind();
             // First Pass end
@@ -1146,7 +1138,7 @@ void Render(App* app)
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_DEPTH_TEST);
 
             switch (app->shadingType)
             {
@@ -1163,9 +1155,28 @@ void Render(App* app)
             
             DrawQuadVao(app);
 
-            glUseProgram(0);      
+            glUseProgram(0);  
             app->QuadFramebuffer->Unbind();
             // Second Pass End
+           
+            // ------ Light Render ------
+            // Lights have to be rendered as normal colors, not affected by other lights
+            // So we have to render them in separate to not be affected in the deferred pass
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->framebuffer->rendererID);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->QuadFramebuffer->rendererID);
+            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            app->QuadFramebuffer->Bind();
+
+            Program& shaderLight = app->programs[app->lightShader];
+            glUseProgram(shaderLight.handle);
+
+            RenderLights(app, shaderLight);
+
+            glUseProgram(0);
+            // ------ Light Render End ------
+
+            app->QuadFramebuffer->Unbind();
+        
         }
             break;
 
@@ -1175,9 +1186,12 @@ void Render(App* app)
 
 void RenderModels(App* app, Program shaderModel)
 {
+    // Bind buffer handle for lights
+    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
-        // Bind buffer handle
+        // Bind buffer handle for models
         glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformBuffer.handle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
 
         Model& model = app->models[app->entities[i].modelIndex];
@@ -1211,8 +1225,6 @@ void RenderLights(App* app, Program shaderModel)
     app->uniformUploader.UploadUniformMat4(shaderModel, "view", app->camera->GetView());
     app->uniformUploader.UploadUniformMat4(shaderModel, "projection", app->camera->GetProjection());
 
-    // Bind buffer handle
-    glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
     for (u32 i = 0; i < app->lights.size(); ++i)
     {
         Light& light = app->lights[i];
