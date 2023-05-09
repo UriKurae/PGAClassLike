@@ -92,11 +92,13 @@ void main()
 			vec3 ambient = 0.1 * uLight[i].color;
 
 			vec3 lightDir = normalize(uLight[i].position - FragPos);
+			vec3 halfwayDir = normalize(lightDir + viewDir);
+
 			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color;
 	
 			// Specular light
 			vec3 reflectDir = reflect(-lightDir, Normal);
-			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
+			float spec = pow(max(dot(Normal, halfwayDir), 0.0), 128.0);
 			vec3 specularLight = Specular * spec * uLight[i].color;
 			
 			lighting += (ambient + diffuse + specularLight) * Diffuse;
