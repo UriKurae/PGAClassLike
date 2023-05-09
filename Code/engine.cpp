@@ -881,6 +881,24 @@ void Gui(App* app)
             ImGui::EndMenu();
         }
        
+        if (ImGui::BeginMenu("OpenGL Info"))
+        {
+
+            ImGui::Text("Version: %s", app->glInfo.glVersion.c_str());
+            ImGui::Text("Renderer: %s", app->glInfo.glRender.c_str());
+            ImGui::Text("Vendor: %s", app->glInfo.glVendor.c_str());
+            ImGui::Text("GLSL Version: %s", app->glInfo.glShadingVersion.c_str());
+
+            ImGui::Separator();
+            ImGui::Text("Extensions");
+
+            for (int i = 0; i < app->glInfo.glExtensions.size(); ++i)
+            {
+                ImGui::Text("Extensions %i : %s", i, app->glInfo.glExtensions[i].c_str());
+            }
+
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
 
@@ -1030,28 +1048,6 @@ void Gui(App* app)
     ImGui::Image((void*)textureID, ImVec2{ (float)app->displaySize.x, (float)app->displaySize.y }, ImVec2{ 0, 1}, ImVec2{ 1, 0 });
     ImGui::End();
 
-
-    // TODO: Uncomment for OpenGL info.
-    //ImGui::OpenPopup("OpenGL Info");
-    if (ImGui::BeginPopup("OpenGL Info"))
-    {
-
-        ImGui::Text("Version: %s", app->glInfo.glVersion.c_str());
-        ImGui::Text("Renderer: %s", app->glInfo.glRender.c_str());
-        ImGui::Text("Vendor: %s", app->glInfo.glVendor.c_str());
-        ImGui::Text("GLSL Version: %s", app->glInfo.glShadingVersion.c_str());
-
-        ImGui::Separator();
-        ImGui::Text("Extensions");
-
-        for (int i = 0; i < app->glInfo.glExtensions.size(); ++i)
-        {
-            ImGui::Text("Extensions %i : %s", i, app->glInfo.glExtensions[i].c_str());
-        }
-
-        ImGui::EndPopup();
-    }
-    ImGui::CloseCurrentPopup();
 }
 
 void Update(App* app)
