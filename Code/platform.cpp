@@ -230,17 +230,17 @@ int main()
         ImGui::Render();
 
         // Clear input state if required by ImGui
-        if (ImGui::GetIO().WantCaptureKeyboard)
+        if (ImGui::GetIO().WantCaptureKeyboard && !app.canUseInput)
         {
-           // for (u32 i = 0; i < KEY_COUNT; ++i)
-            ///    app.input.keys[i] = BUTTON_IDLE;
+            for (u32 i = 0; i < KEY_COUNT; ++i)
+               app.input.keys[i] = BUTTON_IDLE;
         }
             
 
-        if (ImGui::GetIO().WantCaptureMouse)
+        if (ImGui::GetIO().WantCaptureMouse && !app.canUseInput)
         {
-           // for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
-            //    app.input.mouseButtons[i] = BUTTON_IDLE;
+           for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
+               app.input.mouseButtons[i] = BUTTON_IDLE;
 
         }
 
@@ -249,21 +249,21 @@ int main()
         Update(&app);
 
         // Transition input key/button states
-        //if (!ImGui::GetIO().WantCaptureKeyboard)
-        //{
+        if (!ImGui::GetIO().WantCaptureKeyboard || app.canUseInput)
+        {
            for (u32 i = 0; i < KEY_COUNT; ++i)
                if (app.input.keys[i] == BUTTON_PRESS)   app.input.keys[i] = BUTTON_PRESSED;
                else if (app.input.keys[i] == BUTTON_RELEASE) app.input.keys[i] = BUTTON_IDLE;
 
-        //}
+        }
            
-        //if (!ImGui::GetIO().WantCaptureMouse)
-        //{
-            for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
-                if (app.input.mouseButtons[i] == BUTTON_PRESS)   app.input.mouseButtons[i] = BUTTON_PRESSED;
-                else if (app.input.mouseButtons[i] == BUTTON_RELEASE) app.input.mouseButtons[i] = BUTTON_IDLE;
+        if (!ImGui::GetIO().WantCaptureMouse || app.canUseInput)
+        {
+          for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
+              if (app.input.mouseButtons[i] == BUTTON_PRESS)   app.input.mouseButtons[i] = BUTTON_PRESSED;
+              else if (app.input.mouseButtons[i] == BUTTON_RELEASE) app.input.mouseButtons[i] = BUTTON_IDLE;
 
-        //}
+        }
            
         app.input.mouseDelta = glm::vec2(0.0f, 0.0f);
 

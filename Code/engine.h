@@ -164,6 +164,7 @@ struct App
 
     // Input
     Input input;
+    bool canUseInput = true;
 
     // Graphics
     char gpuName[64];

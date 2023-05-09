@@ -1017,7 +1017,15 @@ void Gui(App* app)
     }
     
     static bool opened = true;
-    ImGui::Begin("Viewport", &opened, ImGuiWindowFlags_NoScrollbar);
+    ImGui::Begin("Viewport", &opened, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    if (ImGui::IsWindowFocused())
+    {
+        app->canUseInput = true;
+    }
+    else
+    {
+        app->canUseInput = false;
+    }
     u32 textureID = app->QuadFramebuffer->colorAttachments[0];
     ImGui::Image((void*)textureID, ImVec2{ (float)app->displaySize.x, (float)app->displaySize.y }, ImVec2{ 0, 1}, ImVec2{ 1, 0 });
     ImGui::End();
