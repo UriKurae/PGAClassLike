@@ -672,7 +672,7 @@ void Init(App* app)
     light.position = glm::vec3(-10.0f, 5.0f, 0.0f);
     light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
     light.color = glm::vec3(1.0f, 1.0f, 0.0f);
-    light.model = LoadModel(app, "Primitives/plane.fbx");
+    light.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light);
 
@@ -681,7 +681,7 @@ void Init(App* app)
     light2.position = glm::vec3(10.0f, 5.0f, 0.0f);
     light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
     light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
-    light2.model = LoadModel(app, "Primitives/plane.fbx");
+    light2.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light2);
 
@@ -691,7 +691,7 @@ void Init(App* app)
     // ------- Point Lights -------
     Light light3;
     light3.type = LightType::LightType_Point;
-    light3.position = glm::vec3(0.0f, 0.0f, 1.0f);
+    light3.position = glm::vec3(0.0f, 0.0f, 2.0f);
     light3.direction = glm::vec3(1.0f);
     light3.color = glm::vec3(0.0f, 1.0f, 0.0f);
     light3.model = LoadModel(app, "Primitives/sphere.fbx");
@@ -700,7 +700,7 @@ void Init(App* app)
 
     Light light4;
     light4.type = LightType::LightType_Point;
-    light4.position = glm::vec3(6.0f, 0.0f, 1.0f);
+    light4.position = glm::vec3(6.0f, 0.0f, 2.0f);
     light4.direction = glm::vec3(1.0f);
     light4.color = glm::vec3(0.0f, 0.0f, 1.0f);
     light4.model = LoadModel(app, "Primitives/sphere.fbx");
@@ -710,7 +710,7 @@ void Init(App* app)
 
     Light light5;
     light5.type = LightType::LightType_Point;
-    light5.position = glm::vec3(-6.0f, 0.0f, 1.0f);
+    light5.position = glm::vec3(-6.0f, 0.0f, 2.0f);
     light5.direction = glm::vec3(1.0f);
     light5.color = glm::vec3(1.0f, 0.0f, 0.0f);
     light5.model = LoadModel(app, "Primitives/sphere.fbx");
