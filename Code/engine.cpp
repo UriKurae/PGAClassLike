@@ -669,7 +669,7 @@ void Init(App* app)
     // ------- Directional Lights -------
     Light light;
     light.type = LightType::LightType_Directional;
-    light.position = glm::vec3(-8.0f, 5.0f, 0.0f);
+    light.position = glm::vec3(-10.0f, 5.0f, 0.0f);
     light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
     light.color = glm::vec3(1.0f, 1.0f, 0.0f);
     light.model = LoadModel(app, "Primitives/plane.fbx");
@@ -678,7 +678,7 @@ void Init(App* app)
 
     Light light2;
     light2.type = LightType::LightType_Directional;
-    light2.position = glm::vec3(8.0f, 5.0f, 0.0f);
+    light2.position = glm::vec3(10.0f, 5.0f, 0.0f);
     light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
     light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
     light2.model = LoadModel(app, "Primitives/plane.fbx");
@@ -700,7 +700,7 @@ void Init(App* app)
 
     Light light4;
     light4.type = LightType::LightType_Point;
-    light4.position = glm::vec3(4.0f, 0.0f, 1.0f);
+    light4.position = glm::vec3(6.0f, 0.0f, 1.0f);
     light4.direction = glm::vec3(1.0f);
     light4.color = glm::vec3(0.0f, 0.0f, 1.0f);
     light4.model = LoadModel(app, "Primitives/sphere.fbx");
@@ -710,13 +710,35 @@ void Init(App* app)
 
     Light light5;
     light5.type = LightType::LightType_Point;
-    light5.position = glm::vec3(-4.0f, 0.0f, 1.0f);
+    light5.position = glm::vec3(-6.0f, 0.0f, 1.0f);
     light5.direction = glm::vec3(1.0f);
     light5.color = glm::vec3(1.0f, 0.0f, 0.0f);
     light5.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
     app->lights.push_back(light5);
+
+    Light light6;
+    light6.type = LightType::LightType_Point;
+    light6.position = glm::vec3(0.0f, 4.0f, -3.0f);
+    light6.direction = glm::vec3(1.0f);
+    light6.color = glm::vec3(1.0f, 0.0f, 1.0f);
+    light6.model = LoadModel(app, "Primitives/sphere.fbx");
+
+
+    app->lights.push_back(light6);
+
+    Light light7;
+    light7.type = LightType::LightType_Point;
+    light7.position = glm::vec3(-6.0f, 4.0f, -3.0f);
+    light7.direction = glm::vec3(1.0f);
+    light7.color = glm::vec3(0.19f, 0.84f, 0.78f);
+    light7.model = LoadModel(app, "Primitives/sphere.fbx");
+
+
+    app->lights.push_back(light7);
+
+
     // ------- Point Lights End -------
 
     // ------- End Lights -------
@@ -725,12 +747,12 @@ void Init(App* app)
     // Mesh Program
 
     // Load model and get model Id, but this Id is for the vector of models, it's not actually the renderer ID!
-    //app->model = LoadModel(app, "Patrick/Patrick.obj");
-    //u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
-    //u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
-    app->model = LoadModel(app, "Backpack/backpack.obj");
-    u32 model2 = LoadModel(app, "Backpack/backpack.obj");
-    u32 model3 = LoadModel(app, "Backpack/backpack.obj");
+    app->model = LoadModel(app, "Patrick/Patrick.obj");
+    u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
+    u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
+    //app->model = LoadModel(app, "Backpack/backpack.obj");
+    //u32 model2 = LoadModel(app, "Backpack/backpack.obj");
+    //u32 model3 = LoadModel(app, "Backpack/backpack.obj");
   
     
     
@@ -743,14 +765,14 @@ void Init(App* app)
 
     Entity ent2 = {};
     ent2.PushEntity(model2);
-    ent2.position = vec3(4.0f, 0.0f, 0.0f);
+    ent2.position = vec3(6.0f, 0.0f, 0.0f);
     ent2.scale = vec3(1.0f);
     ent2.rotation = vec3(0.0f);
     app->entities.push_back(ent2);
 
     Entity ent3 = {};
     ent3.PushEntity(model3);
-    ent3.position = vec3(-4.0f, 0.0f, 0.0f);
+    ent3.position = vec3(-6.0f, 0.0f, 0.0f);
     ent3.scale = vec3(1.0f);
     ent3.rotation = vec3(0.0f);
     app->entities.push_back(ent3);
@@ -798,8 +820,19 @@ void Gui(App* app)
                 const char* items[] = { "Albedo", "Normals" , "Position", "Specular", "Depth" };
                 static int itemCurrent = 0;
                 ImGui::Text("Select Desired:");
-                ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items));
-                app->renderTarget = (RenderTarget)itemCurrent;
+                if (ImGui::Combo("##combo", &itemCurrent, items, IM_ARRAYSIZE(items)))
+                {
+                    app->renderTarget = (RenderTarget)itemCurrent;
+                    if (app->renderTarget != RenderTarget::RENDER_ALBEDO)
+                    {
+                        app->activeLights = false;
+                    }
+                    else
+                    {
+                        app->activeLights = true;
+                    }
+                }
+                
                 ImGui::EndMenu();
             }
             else
@@ -840,6 +873,10 @@ void Gui(App* app)
             ImGui::Text("Field Of View");
             ImGui::SliderFloat("##Field Of View", &fov, 60.0f, 160.0f, "%.2f");
             app->camera->UpdateFov(fov);
+
+            ImGui::Text("Debug Lights");
+            ImGui::SameLine();
+            ImGui::Checkbox("##Debug Lights", &app->activeLights);
 
             ImGui::EndMenu();
         }
@@ -1138,7 +1175,7 @@ void Render(App* app)
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_DEPTH_TEST);
 
             switch (app->shadingType)
             {
@@ -1166,11 +1203,12 @@ void Render(App* app)
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->QuadFramebuffer->rendererID);
             glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             app->QuadFramebuffer->Bind();
+            glEnable(GL_DEPTH_TEST);
 
             Program& shaderLight = app->programs[app->lightShader];
             glUseProgram(shaderLight.handle);
 
-            RenderLights(app, shaderLight);
+            RenderLights(app, shaderLight, app->activeLights);
 
             glUseProgram(0);
             // ------ Light Render End ------
@@ -1208,9 +1246,9 @@ void RenderModels(App* app, Program shaderModel)
             glUniform1i(app->modelShaderTextureUniformLocation, 0);
             glActiveTexture(GL_TEXTURE0);
             // This is for Backpack
-            GLuint textureHandle = app->textures[app->modelTexture].handle;
+            //GLuint textureHandle = app->textures[app->modelTexture].handle;
             // This for patrick
-            //GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
+            GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
             glBindTexture(GL_TEXTURE_2D, textureHandle);
 
             Submesh& submesh = mesh.submeshes[j];
@@ -1220,29 +1258,32 @@ void RenderModels(App* app, Program shaderModel)
     }
 }
 
-void RenderLights(App* app, Program shaderModel)
+void RenderLights(App* app, Program shaderModel, bool active)
 {
-    app->uniformUploader.UploadUniformMat4(shaderModel, "view", app->camera->GetView());
-    app->uniformUploader.UploadUniformMat4(shaderModel, "projection", app->camera->GetProjection());
-
-    for (u32 i = 0; i < app->lights.size(); ++i)
+    if (active)
     {
-        Light& light = app->lights[i];
-        Model& model = app->models[light.model];
-        Mesh& mesh = app->meshes[model.meshIdx];
+        app->uniformUploader.UploadUniformMat4(shaderModel, "view", app->camera->GetView());
+        app->uniformUploader.UploadUniformMat4(shaderModel, "projection", app->camera->GetProjection());
 
-        app->uniformUploader.UploadUniformMat4(shaderModel, "model", light.GetTransformMat());
-        app->uniformUploader.UploadUniformFloat3(shaderModel, "lightColor", light.color);
-        
-
-        for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+        for (u32 i = 0; i < app->lights.size(); ++i)
         {
-            u32 vao = FindVao(mesh, j, shaderModel);
-            glBindVertexArray(vao);
+            Light& light = app->lights[i];
+            Model& model = app->models[light.model];
+            Mesh& mesh = app->meshes[model.meshIdx];
 
-            Submesh& submesh = mesh.submeshes[j];
-            glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-            glBindVertexArray(0);
+            app->uniformUploader.UploadUniformMat4(shaderModel, "model", light.GetTransformMat());
+            app->uniformUploader.UploadUniformFloat3(shaderModel, "lightColor", light.color);
+
+
+            for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+            {
+                u32 vao = FindVao(mesh, j, shaderModel);
+                glBindVertexArray(vao);
+
+                Submesh& submesh = mesh.submeshes[j];
+                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                glBindVertexArray(0);
+            }
         }
     }
 }

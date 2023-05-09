@@ -209,6 +209,7 @@ struct App
     // Lights
     std::vector<Light> lights;
     u32 lightShader;
+    bool activeLights = true;
 
     // --------- Uniform buffers mesh Shader ---------
     // Uniform buffers size and alignment
@@ -263,7 +264,7 @@ void Update(App* app);
 void Render(App* app);
 
 void RenderModels(App* app, Program shaderModel);
-void RenderLights(App* app, Program shaderModel);
+void RenderLights(App* app, Program shaderModel, bool active);
 
 void GenerateQuadVao(App* app);
 
