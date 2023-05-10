@@ -604,12 +604,21 @@ void Init(App* app)
 
     app->lightShader = LoadProgram(app, "lightShader.glsl", "LIGHT_SHADER");
 
+    app->bloomShader = LoadProgram(app, "bloomShader.glsl", "BLOOM_SHADER");
+
     app->quadDeferredShader = LoadProgram(app, "DeferredShader.glsl", "QUAD_DEFERRED");
     
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
 
+    
+    // Multi pass Bloom, create 2 framebuffers with only 1 color attachment
+    std::vector<int> attachments = { GL_RGBA16F };
+    app->bloomBuffer.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
+    app->bloomBuffer.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
+    
+
     // First pass framebuffer
-    std::vector<int> attachments = { GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
+    attachments = { GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F };
     app->framebuffer = std::make_shared<FrameBuffer>(app->displaySize, attachments);
 
     // Second pass for the quad and generating the ImGui Image
@@ -1174,6 +1183,25 @@ void Render(App* app)
             app->framebuffer->Unbind();
             // First Pass end
 
+            // Bloom pass **Accumulate blur**
+            bool horizontal = true, firstIteration = true;
+            int amount = 10;
+            Program& shaderBloom = app->programs[app->bloomShader];
+            glUseProgram(shaderBloom.handle);
+            for (u32 i = 0; i < amount; ++i)
+            {
+                app->bloomBuffer[horizontal]->Bind();
+                app->uniformUploader.UploadUniformInt(shaderBloom, "horizontal", horizontal);
+                glBindTexture(GL_TEXTURE_2D, firstIteration ? app->framebuffer->colorAttachments[4] : app->bloomBuffer[!horizontal]->colorAttachments[0]);
+                DrawQuadVao(app);
+                horizontal = !horizontal;
+                if (firstIteration)
+                    firstIteration = false;
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            // Bloom pass End
+
             // Second Pass
             app->QuadFramebuffer->Bind();
 
@@ -1351,6 +1379,11 @@ void DrawForwardRendering(App* app)
 
     u32 renderLocationUniform = glGetUniformLocation(quadShader.handle, "renderTarget");
     glUniform1i(renderLocationUniform, (int)app->renderTarget);
+
+    u32 bloomUniformTexture = glGetUniformLocation(quadShader.handle, "bloomBlur");
+    glUniform1i(bloomUniformTexture, 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, app->bloomBuffer[0]->colorAttachments[0]);
 }
 
 void DrawDeferredRendering(App* app)

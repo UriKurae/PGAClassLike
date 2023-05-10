@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-#ifdef QUAD_FRAMEBUFFER
+#ifdef BLOOM_SHADER
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
@@ -23,47 +23,35 @@ void main()
 in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
-uniform sampler2D bloomBlur;
 
 uniform int renderTarget;
 
 layout(location=0) out vec4 oColor;
-
-float near = 0.1; 
-float far  = 100.0; 
   
-float LinearizeDepth(float depth) 
-{
-    float z = depth * 2.0 - 1.0; // back to NDC 
-    return (2.0 * near * far) / (far + near - z * (far - near));	
-}
+uniform bool horizontal;
+uniform float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 void main()
 {
-	
-	switch(renderTarget)
-	{
-	 case 0:
-		oColor = texture(screenTexture, TexCoords);
-		oColor += texture(bloomBlur, TexCoords).rgb;
-	 break;
-	 case 1:
-		vec4 normalColor = texture(screenTexture, TexCoords);
-		oColor = normalColor;
-	 break;
-	 case 2:
-	    oColor = texture(screenTexture, TexCoords);
-	 break;
-	 case 3:
-		oColor = vec4(vec3(texture(screenTexture, TexCoords).a), 1.0);
-	 break;
-	 case 4:
-		// First is regular depth, second is linear one
-		//float depth = texture(screenTexture, TexCoords).r;
-		float depth = LinearizeDepth(texture(screenTexture, TexCoords).r) / far; // divide by far for demonstration
-		oColor = vec4(vec3(depth), 1.0);
-	 break;
-	}
+	vec2 tex_offset = 1.0 / textureSize(screenTexture, 0); 
+    vec3 result = texture(screenTexture, TexCoords).rgb * weight[0];
+    if(horizontal)
+    {
+        for(int i = 1; i < 5; ++i)
+        {
+            result += texture(screenTexture, TexCoords + vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
+            result += texture(screenTexture, TexCoords - vec2(tex_offset.x * i, 0.0)).rgb * weight[i];
+        }
+    }
+    else
+    {
+        for(int i = 1; i < 5; ++i)
+        {
+            result += texture(screenTexture, TexCoords + vec2(0.0, tex_offset.y * i)).rgb * weight[i];
+            result += texture(screenTexture, TexCoords - vec2(0.0, tex_offset.y * i)).rgb * weight[i];
+        }
+    }
+    oColor = vec4(result, 1.0);
 	
 }
 

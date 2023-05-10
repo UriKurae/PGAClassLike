@@ -181,6 +181,10 @@ struct App
     // Framebuffers
     std::shared_ptr<FrameBuffer> framebuffer;
     std::shared_ptr<FrameBuffer> QuadFramebuffer;
+    std::vector<std::shared_ptr<FrameBuffer>> bloomBuffer;
+    
+    // bloom shader
+    u32 bloomShader;
 
     // Framebuffer image shader
     u32 quadFBshader;

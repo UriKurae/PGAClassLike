@@ -61,6 +61,7 @@ layout(location=0) out vec4 albedoColor;
 layout(location=1) out vec4 normalColor;
 layout(location=2) out vec4 positionColor;
 layout(location=3) out vec4 specularColor;
+layout(location=4) out vec4 brightColor;
 
 vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection);
 vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection);
@@ -91,6 +92,12 @@ void main()
 	}	
 	// Store albedo color
 	albedoColor = vec4(finalLight, 1.0);
+
+	float brightness = dot(albedoColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 0.7)
+		brightColor = vec4(albedoColor.rgb, 1.0);
+	else
+		brightColor = vec4(0.0, 0.0,0.0,1.0);
 
 	normalColor = vec4(vec3(vNormal), 1.0);
 
