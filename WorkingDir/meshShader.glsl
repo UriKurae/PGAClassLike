@@ -21,6 +21,7 @@ layout(location=4) in vec3 aBiTangent;
 out vec2 vTexCoord;
 out vec3 vPosition;
 out vec3 vNormal;
+out mat3 tbn;
 
 void main()
 {
@@ -28,6 +29,12 @@ void main()
 	
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+
+	vec3 t = normalize(vec3(uWorldMatrix * vec4(aTangent, 1.0)));
+	vec3 b = normalize(vec3(uWorldMatrix * vec4(aBiTangent, 1.0)));
+	vec3 n = normalize(vec3(uWorldMatrix * vec4(aNormal, 1.0)));
+	b = cross(n, t);
+	mat3 tbn = mat3(t, b, n);
 	
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 
@@ -38,9 +45,12 @@ void main()
 in vec2 vTexCoord;
 in vec3 vNormal;
 in vec3 vPosition;
+in mat3 tbn;
 
 uniform sampler2D uTexture;
+uniform sampler2D normalTexture;
 uniform int renderMode;
+uniform int useNormalMap;
 
 struct Light
 {
@@ -75,14 +85,36 @@ void main()
 		{
 			if (uLight[i].type == 0)
 			{
-				vec3 norm = normalize(vNormal);
+				vec3 norm = vec3(0.0);
+				if (useNormalMap == 0)
+				{
+					norm = normalize(vNormal);
+				}
+				else if (useNormalMap == 1)
+				{
+					norm = texture(normalTexture, vTexCoord).rgb;
+					norm = normalize(norm * 2.0 - 1.0);  
+					
+					//norm = normalize(tbn * norm);
+				}
+   
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 				
 				finalLight += CalcDirLight(norm, uLight[i], viewDir) * diffuse;
 			}
 			else if (uLight[i].type == 1)
 			{
-				vec3 norm = normalize(vNormal);
+				vec3 norm = vec3(0.0);
+				if (useNormalMap == 0)
+				{
+					norm = normalize(vNormal);
+				}
+				else if (useNormalMap == 1)
+				{
+					norm = texture(normalTexture, vTexCoord).rgb;
+					norm = normalize(norm * 2.0 - 1.0); 
+					//norm = normalize(tbn * norm);
+				}
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 
 				finalLight += CalcPointLight(norm, uLight[i], viewDir) * diffuse;

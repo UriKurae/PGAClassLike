@@ -15,6 +15,7 @@ struct Light
 	glm::vec3 direction;
 	glm::vec3 position;
 	glm::vec3 intensity;
+	bool enabled;
 	u32 model;
 
 	glm::mat4 GetTransformMat()

@@ -9,7 +9,7 @@ EditorCamera::EditorCamera(int w, int h, float near, float far)
 
 	// Get view and projection matrix 
 	view = glm::lookAt(cameraPos, cameraPos + camFront, camUp);
-	projection = glm::perspective(glm::radians(80.0f), float(w) / (float)h, near, far);
+	projection = glm::perspective(glm::radians(60.0f), float(w) / (float)h, near, far);
 
 	width = w;
 	height = h;

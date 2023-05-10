@@ -319,7 +319,8 @@ void ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh* myMesh, u32 bas
             vertices.push_back(mesh->mTextureCoords[0][i].y);
         }
 
-        if (mesh->mTangents != nullptr && mesh->mBitangents)
+        
+        if (mesh->HasTangentsAndBitangents())
         {
             hasTangentSpace = true;
             vertices.push_back(mesh->mTangents[i].x);
@@ -672,6 +673,7 @@ void Init(App* app)
     light.position = glm::vec3(-10.0f, 5.0f, 0.0f);
     light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
     light.color = glm::vec3(1.0f, 1.0f, 0.0f);
+    light.enabled = true;
     light.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light);
@@ -681,6 +683,7 @@ void Init(App* app)
     light2.position = glm::vec3(10.0f, 5.0f, 0.0f);
     light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
     light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
+    light2.enabled = true;
     light2.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light2);
@@ -694,6 +697,7 @@ void Init(App* app)
     light3.position = glm::vec3(0.0f, 0.0f, 2.0f);
     light3.direction = glm::vec3(1.0f);
     light3.color = glm::vec3(0.0f, 1.0f, 0.0f);
+    light3.enabled = true;
     light3.model = LoadModel(app, "Primitives/sphere.fbx");
 
     app->lights.push_back(light3);
@@ -703,6 +707,7 @@ void Init(App* app)
     light4.position = glm::vec3(6.0f, 0.0f, 2.0f);
     light4.direction = glm::vec3(1.0f);
     light4.color = glm::vec3(0.0f, 0.0f, 1.0f);
+    light4.enabled = true;
     light4.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
@@ -713,6 +718,7 @@ void Init(App* app)
     light5.position = glm::vec3(-6.0f, 0.0f, 2.0f);
     light5.direction = glm::vec3(1.0f);
     light5.color = glm::vec3(1.0f, 0.0f, 0.0f);
+    light5.enabled = true;
     light5.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
@@ -723,6 +729,7 @@ void Init(App* app)
     light6.position = glm::vec3(0.0f, 4.0f, -3.0f);
     light6.direction = glm::vec3(1.0f);
     light6.color = glm::vec3(1.0f, 0.0f, 1.0f);
+    light6.enabled = true;
     light6.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
@@ -733,6 +740,7 @@ void Init(App* app)
     light7.position = glm::vec3(-6.0f, 4.0f, -3.0f);
     light7.direction = glm::vec3(1.0f);
     light7.color = glm::vec3(0.19f, 0.84f, 0.78f);
+    light7.enabled = true;
     light7.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
@@ -784,10 +792,12 @@ void Init(App* app)
     Program& shaderModel = app->programs[app->modelShaderID];
  
     // Load model texture and get texture ID from the vectors of textures.
-    app->modelTexture = LoadTexture2D(app, "Backpack/diffuse.jpg");
+    app->modelTexture = LoadTexture2D(app, "Backpack/brickwall.jpg");
+    app->modelTextureNormal = LoadTexture2D(app, "Backpack/brickwall_normal.jpg");
 
     // Get uniform location from the texture for later use
     app->modelShaderTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "uTexture");
+    app->modelShaderNormalTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "normalTexture");
     
     // End Mesh Program
 
@@ -869,7 +879,7 @@ void Gui(App* app)
             ImGui::SliderFloat("##Sensitivity", &MouseSensitivity, 0.1f, 100.0f, "%.2f");
             app->camera->SetMouseSensitivity(MouseSensitivity);
 
-            static float fov = 80.0f;
+            static float fov = 60.0f;
             ImGui::Text("Field Of View");
             ImGui::SliderFloat("##Field Of View", &fov, 60.0f, 160.0f, "%.2f");
             app->camera->UpdateFov(fov);
@@ -877,6 +887,18 @@ void Gui(App* app)
             ImGui::Text("Debug Lights");
             ImGui::SameLine();
             ImGui::Checkbox("##Debug Lights", &app->activeLights);
+
+            ImGui::Text("Use Normal Map (If has one)");
+            static bool normalMap = false;
+            ImGui::Checkbox("##normalMode", &normalMap);
+            if (normalMap)
+            {
+                app->useNormalMap = 1;
+            }
+            else
+            {
+                app->useNormalMap = 0;
+            }
 
             ImGui::EndMenu();
         }
@@ -1028,6 +1050,17 @@ void Gui(App* app)
         ImGui::SameLine();
         ImGui::ColorEdit4("##Color", &light.color[0], ImGuiColorEditFlags_NoInputs);
 
+        ImGui::Checkbox("Enable", &light.enabled);
+        if (light.enabled)
+        {
+            light.color = glm::vec3(1.0f);
+        }
+        else
+        {
+            light.color = glm::vec3(0.0f);
+        }
+
+
         ImGui::Separator();
 
         ImGui::PopID();
@@ -1165,6 +1198,9 @@ void Render(App* app)
             u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
             glUniform1i(renderModeUniform, (int)app->renderTarget);
 
+            u32 debugNormalMapUniform = glGetUniformLocation(shaderModel.handle, "useNormalMap");
+            glUniform1i(debugNormalMapUniform, app->useNormalMap);
+
             RenderModels(app, shaderModel);
             
             glUseProgram(0);
@@ -1250,10 +1286,17 @@ void RenderModels(App* app, Program shaderModel)
             glUniform1i(app->modelShaderTextureUniformLocation, 0);
             glActiveTexture(GL_TEXTURE0);
             // This is for Backpack
-            //GLuint textureHandle = app->textures[app->modelTexture].handle;
+            GLuint textureHandle = app->textures[app->modelTexture].handle;
             // This for patrick
-            GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
+            //GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
             glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+            glUniform1i(app->modelShaderNormalTextureUniformLocation, 1);
+            glActiveTexture(GL_TEXTURE1);
+            // This is for Backpack
+            GLuint textureHandle2 = app->textures[app->modelTextureNormal].handle;
+            glBindTexture(GL_TEXTURE_2D, textureHandle2);
+
 
             Submesh& submesh = mesh.submeshes[j];
             glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);

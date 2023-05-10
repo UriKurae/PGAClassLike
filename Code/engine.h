@@ -199,7 +199,10 @@ struct App
     u32 model;
     u32 modelShaderID;
     u32 modelShaderTextureUniformLocation;
+    u32 modelShaderNormalTextureUniformLocation;
     u32 modelTexture;
+    u32 modelTextureNormal;
+    bool useNormalMap = false;
 
     // Uniforms helper
     BasicUniformUploader uniformUploader;
