@@ -48,6 +48,7 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
+	vec3 intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -116,7 +117,7 @@ vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection)
 	vec3 lightDir = normalize(dirLight.direction);
 	
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = diff * dirLight.color * 1.0;
+	vec3 diffuse = diff * dirLight.color * dirLight.intensity;
 	
 	float ambientStrength = 0.1;
 	vec3 ambientLight = ambientStrength * dirLight.color;
@@ -124,7 +125,7 @@ vec3 CalcDirLight(vec3 normal, Light dirLight, vec3 viewDirection)
 	float specularStrength = 0.5;
 	vec3 reflectDir = reflect(lightDir, normal);
 	float spec = pow(max(dot(viewDirection, reflectDir), 0.0), 128.0);
-	vec3 specularLight = specularStrength * spec * dirLight.color;
+	vec3 specularLight = specularStrength * spec * dirLight.color * dirLight.intensity;
 
 	return diffuse + ambientLight + specularLight;
 }
@@ -135,7 +136,7 @@ vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection)
 	vec3 halfwayDir = normalize(lightDir + viewDirection);
 
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = diff * pointLight.color;
+	vec3 diffuse = diff * pointLight.color * pointLight.intensity;
 	
 	float ambientStrength = 0.1;
 	vec3 ambientLight = ambientStrength * pointLight.color;
@@ -143,7 +144,7 @@ vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection)
 	float specularStrength = 0.5;
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 128.0);
-	vec3 specularLight = specularStrength * spec * pointLight.color;
+	vec3 specularLight = specularStrength * spec * pointLight.color * pointLight.intensity;
 
 	return diffuse + ambientLight + specularLight;
 }

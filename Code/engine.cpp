@@ -681,6 +681,7 @@ void Init(App* app)
     light.position = glm::vec3(-10.0f, 5.0f, 0.0f);
     light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
     light.color = glm::vec3(0.0f);
+    light.intensity = glm::vec3(1.0f);
     light.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light);
@@ -690,6 +691,7 @@ void Init(App* app)
     light2.position = glm::vec3(10.0f, 5.0f, 0.0f);
     light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
     light2.color = glm::vec3(0.0f);
+    light2.intensity = glm::vec3(1.0f);
     light2.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light2);
@@ -703,6 +705,7 @@ void Init(App* app)
     light3.position = glm::vec3(0.0f, 0.0f, 2.0f);
     light3.direction = glm::vec3(1.0f);
     light3.color = glm::vec3(0.0f, 1.0f, 0.0f);
+    light3.intensity = glm::vec3(1.0f);
     light3.model = LoadModel(app, "Primitives/sphere.fbx");
 
     app->lights.push_back(light3);
@@ -712,6 +715,7 @@ void Init(App* app)
     light4.position = glm::vec3(6.0f, 0.0f, 2.0f);
     light4.direction = glm::vec3(1.0f);
     light4.color = glm::vec3(0.0f, 0.0f, 1.0f);
+    light4.intensity = glm::vec3(1.0f);
     light4.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
@@ -721,6 +725,7 @@ void Init(App* app)
     light5.type = LightType::LightType_Point;
     light5.position = glm::vec3(-6.0f, 0.0f, 2.0f);
     light5.direction = glm::vec3(1.0f);
+    light5.intensity = glm::vec3(1.0f);
     light5.color = glm::vec3(1.0f, 0.0f, 0.0f);
     light5.model = LoadModel(app, "Primitives/sphere.fbx");
 
@@ -731,6 +736,7 @@ void Init(App* app)
     light6.type = LightType::LightType_Point;
     light6.position = glm::vec3(0.0f, 4.0f, -3.0f);
     light6.direction = glm::vec3(1.0f);
+    light6.intensity = glm::vec3(1.0f);
     light6.color = glm::vec3(1.0f, 0.0f, 1.0f);
     light6.model = LoadModel(app, "Primitives/sphere.fbx");
 
@@ -741,6 +747,7 @@ void Init(App* app)
     light7.type = LightType::LightType_Point;
     light7.position = glm::vec3(-6.0f, 4.0f, -3.0f);
     light7.direction = glm::vec3(1.0f);
+    light7.intensity = glm::vec3(1.0f);
     light7.color = glm::vec3(0.19f, 0.84f, 0.78f);
     light7.model = LoadModel(app, "Primitives/sphere.fbx");
 
@@ -1049,6 +1056,11 @@ void Gui(App* app)
         ImGui::SameLine();
         ImGui::ColorEdit4("##Color", &light.color[0], ImGuiColorEditFlags_NoInputs);
 
+        ImGui::Text("Intensity");
+        ImGui::DragFloat("##Intensity", &light.intensity.x, 0.1f, 0.0f, 200.0f, "%.2f");
+        light.intensity.y = light.intensity.x;
+        light.intensity.z = light.intensity.x;
+        
         ImGui::Separator();
 
         ImGui::PopID();
@@ -1090,11 +1102,12 @@ void Update(App* app)
         AlignHead(app->uniformBuffer, sizeof(vec4));
 
         Light& light = app->lights[i];
-
+        //ELOG("INTENSITY %f %f %f ", light.intensity.x, light.intensity.y, light.intensity.z);
         PushUInt(app->uniformBuffer, light.type);
         PushVec3(app->uniformBuffer, light.color);
         PushVec3(app->uniformBuffer, light.direction);
         PushVec3(app->uniformBuffer, light.position);
+        PushVec3(app->uniformBuffer, light.intensity);
     }
 
     app->globalParamsSize = app->uniformBuffer.head - app->globalParamsOffset;
