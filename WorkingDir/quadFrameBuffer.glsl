@@ -26,6 +26,8 @@ uniform sampler2D screenTexture;
 uniform sampler2D bloomBlur;
 
 uniform int renderTarget;
+uniform float exposureLevel;
+uniform int exposureActive;
 
 layout(location=0) out vec4 oColor;
 
@@ -44,8 +46,23 @@ void main()
 	switch(renderTarget)
 	{
 	 case 0:
-		oColor = texture(screenTexture, TexCoords);
-		oColor += texture(bloomBlur, TexCoords).rgb;
+	 
+	 if (exposureActive == 1)
+	 {
+		const float gamma = 2.2;
+		vec3 hdrColor = texture(screenTexture, TexCoords).rgb;
+ 
+		vec3 tone = vec3(1.0) - exp(-hdrColor * exposureLevel);
+	
+		tone = pow(tone, vec3(1.0 / gamma));
+  
+		oColor = vec4(tone, 1.0);
+	 }
+	 else if (exposureActive == 0)
+	 {
+		oColor += texture(screenTexture, TexCoords);
+	 }
+
 	 break;
 	 case 1:
 		vec4 normalColor = texture(screenTexture, TexCoords);

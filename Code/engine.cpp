@@ -622,7 +622,7 @@ void Init(App* app)
     app->framebuffer = std::make_shared<FrameBuffer>(app->displaySize, attachments);
 
     // Second pass for the quad and generating the ImGui Image
-    attachments = { GL_RGBA16F };
+    attachments = { GL_RGBA8 };
     app->QuadFramebuffer = std::make_shared<FrameBuffer>(app->displaySize, attachments);
 
     // Get max uniform size allowed for uniform buffers
@@ -680,7 +680,7 @@ void Init(App* app)
     light.type = LightType::LightType_Directional;
     light.position = glm::vec3(-10.0f, 5.0f, 0.0f);
     light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
-    light.color = glm::vec3(1.0f, 1.0f, 0.0f);
+    light.color = glm::vec3(0.0f);
     light.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light);
@@ -689,7 +689,7 @@ void Init(App* app)
     light2.type = LightType::LightType_Directional;
     light2.position = glm::vec3(10.0f, 5.0f, 0.0f);
     light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
-    light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
+    light2.color = glm::vec3(0.0f);
     light2.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light2);
@@ -860,6 +860,22 @@ void Gui(App* app)
             app->shadingType = (ShadingType)currentRenderMode;
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Light"))
+        {
+            ImGui::Text("Debug Lights");
+            ImGui::SameLine();
+            ImGui::Checkbox("##Debug Lights", &app->activeLights);
+
+            ImGui::Separator();
+            ImGui::Text("Exposure Level");
+            ImGui::DragFloat("##Exposure Level", &app->exposureLevel, 0.1f, 0.0f, 100.0f, "%.2f");
+
+            ImGui::Text("Activate Exposure");
+            ImGui::SameLine();
+            ImGui::Checkbox("##Activate Exposure", &app->exposureActive);
+
+            ImGui::EndMenu();
+        }
 
         if (ImGui::BeginMenu("Utils"))
         {
@@ -882,10 +898,6 @@ void Gui(App* app)
             ImGui::Text("Field Of View");
             ImGui::SliderFloat("##Field Of View", &fov, 60.0f, 160.0f, "%.2f");
             app->camera->UpdateFov(fov);
-
-            ImGui::Text("Debug Lights");
-            ImGui::SameLine();
-            ImGui::Checkbox("##Debug Lights", &app->activeLights);
 
             ImGui::EndMenu();
         }
@@ -1349,6 +1361,10 @@ void DrawForwardRendering(App* app)
     Program& quadShader = app->programs[app->quadFBshader];
     glUseProgram(quadShader.handle);
     glEnable(GL_BLEND);
+    app->uniformUploader.UploadUniformFloat(quadShader, "exposureLevel", app->exposureLevel);
+    app->uniformUploader.UploadUniformInt(quadShader, "exposureActive", app->exposureActive);
+
+
     u32 colorLocation = glGetUniformLocation(quadShader.handle, "screenTexture");
     glUniform1i(colorLocation, 0);
     glActiveTexture(GL_TEXTURE0);
@@ -1391,6 +1407,10 @@ void DrawDeferredRendering(App* app)
     glDisable(GL_BLEND);
     Program& quadShader = app->programs[app->quadDeferredShader];
     glUseProgram(quadShader.handle);
+    
+    app->uniformUploader.UploadUniformFloat(quadShader, "exposureLevel", app->exposureLevel);
+    app->uniformUploader.UploadUniformInt(quadShader, "exposureActive", app->exposureActive);
+
 
     u32 colorLocation = glGetUniformLocation(quadShader.handle, "gColor");
     glUniform1i(colorLocation, 0);

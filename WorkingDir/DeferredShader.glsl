@@ -51,6 +51,9 @@ uniform sampler2D gNormal;
 uniform sampler2D gPosition;
 uniform sampler2D gAlbedoSpec;
 
+uniform float exposureLevel;
+uniform int exposureActive;
+
 
 void main()
 {
@@ -107,7 +110,22 @@ void main()
 	}
 	
 	vec3 finalColor = lighting;
-	oColor = vec4(lighting, 1.0);
+
+	if (exposureActive == 1)
+	{
+		const float gamma = 2.2;
+		vec3 hdrColor = finalColor.rgb;
+ 
+		vec3 tone = vec3(1.0) - exp(-hdrColor * exposureLevel);
+		
+		tone = pow(tone, vec3(1.0 / gamma));
+  
+		oColor = vec4(tone, 1.0);
+	}
+	else if(exposureActive == 0)
+	{
+		oColor = vec4(lighting, 1.0);
+	}
 }
 
 #endif

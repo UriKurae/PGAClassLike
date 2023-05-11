@@ -215,6 +215,8 @@ struct App
     std::vector<Light> lights;
     u32 lightShader;
     bool activeLights = true;
+    float exposureLevel = 0.1f;
+    bool exposureActive = true;
 
     // --------- Uniform buffers mesh Shader ---------
     // Uniform buffers size and alignment
