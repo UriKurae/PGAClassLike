@@ -1213,15 +1213,20 @@ void Render(App* app)
             int amount = 10;
             Program& shaderBloom = app->programs[app->bloomShader];
             glUseProgram(shaderBloom.handle);
+            glDisable(GL_DEPTH_TEST);
             for (u32 i = 0; i < amount; ++i)
             {
                 app->bloomBuffer[horizontal]->Bind();
+                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 app->uniformUploader.UploadUniformInt(shaderBloom, "horizontal", horizontal);
                 glBindTexture(GL_TEXTURE_2D, firstIteration ? app->framebuffer->colorAttachments[4] : app->bloomBuffer[!horizontal]->colorAttachments[0]);
                 DrawQuadVao(app);
                 horizontal = !horizontal;
                 if (firstIteration)
                     firstIteration = false;
+
+                app->bloomBuffer[horizontal]->Unbind();
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1232,7 +1237,7 @@ void Render(App* app)
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_DEPTH_TEST);
 
             switch (app->shadingType)
             {
