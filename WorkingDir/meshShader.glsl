@@ -23,6 +23,11 @@ out vec3 vPosition;
 out vec3 vNormal;
 out mat3 tbn;
 
+out vec3 tangentLocalSpace;
+out vec3 bitangentLocalSpace;
+out vec3 normalLocalSpace;
+out mat4 viewMat;
+
 void main()
 {
 	vTexCoord = aTexCoord;
@@ -30,11 +35,11 @@ void main()
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
 
-	vec3 t = normalize(vec3(uWorldMatrix * vec4(aTangent, 1.0)));
-	vec3 b = normalize(vec3(uWorldMatrix * vec4(aBiTangent, 1.0)));
-	vec3 n = normalize(vec3(uWorldMatrix * vec4(aNormal, 1.0)));
-	b = cross(n, t);
-	mat3 tbn = mat3(t, b, n);
+	tangentLocalSpace = aTangent;
+	bitangentLocalSpace = aBiTangent;
+	normalLocalSpace = aNormal;
+	viewMat = uWorldViewMatrix;
+
 	
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 
@@ -45,7 +50,11 @@ void main()
 in vec2 vTexCoord;
 in vec3 vNormal;
 in vec3 vPosition;
-in mat3 tbn;
+
+in vec3 tangentLocalSpace;
+in vec3 bitangentLocalSpace;
+in vec3 normalLocalSpace;
+in mat4 viewMat;
 
 uniform sampler2D uTexture;
 uniform sampler2D normalTexture;
@@ -77,6 +86,15 @@ vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection);
 
 void main()
 {
+	vec3 T = normalize(tangentLocalSpace);
+	vec3 B = normalize(bitangentLocalSpace);
+	vec3 N = normalize(normalLocalSpace);
+	mat3 TBN = mat3(T,B,N);
+
+	vec3 tangentSpaceNormal = texture(normalTexture, vTexCoord).xyz * 2.0 - vec3(1.0);
+	vec3 localSpaceNormal = TBN * tangentSpaceNormal;
+	vec3 viewSpaceNormal = normalize(viewMat * vec4(localSpaceNormal, 0.0)).xyz;
+
 	vec3 diffuse = texture(uTexture, vTexCoord).rgb;
 	vec3 finalLight = vec3(0.0);
 	if (renderMode == 0)
@@ -92,10 +110,7 @@ void main()
 				}
 				else if (useNormalMap == 1)
 				{
-					norm = texture(normalTexture, vTexCoord).rgb;
-					norm = normalize(norm * 2.0 - 1.0);  
-					
-					//norm = normalize(tbn * norm);
+					norm = viewSpaceNormal;
 				}
    
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
@@ -111,9 +126,8 @@ void main()
 				}
 				else if (useNormalMap == 1)
 				{
-					norm = texture(normalTexture, vTexCoord).rgb;
-					norm = normalize(norm * 2.0 - 1.0); 
-					//norm = normalize(tbn * norm);
+					norm = viewSpaceNormal;
+					
 				}
 				vec3 viewDir = normalize(uCameraPosition - vPosition);
 
