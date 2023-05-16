@@ -181,8 +181,13 @@ struct App
     // Framebuffers
     std::shared_ptr<FrameBuffer> framebuffer;
     std::shared_ptr<FrameBuffer> QuadFramebuffer;
-    std::vector<std::shared_ptr<FrameBuffer>> bloomBuffer;
+    std::vector<std::shared_ptr<FrameBuffer>> bloomBufferModels;
+    std::vector<std::shared_ptr<FrameBuffer>> bloomBufferLights;
     
+    // Bloomed images
+    u32 modelBloomed;
+    u32 lightsBloomed;
+
     // bloom shader
     u32 bloomShader;
 
@@ -281,3 +286,4 @@ void DrawForwardRendering(App* app);
 
 void DrawDeferredRendering(App* app);
 
+u32 CalculateBloom(App* app, u32 attachmentToBloom, std::vector<std::shared_ptr<FrameBuffer>> buffers);

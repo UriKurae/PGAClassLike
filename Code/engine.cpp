@@ -611,11 +611,16 @@ void Init(App* app)
     app->camera = std::make_shared<EditorCamera>(app->displaySize.x, app->displaySize.y, 0.1f, 100.0f);
 
     
-    // Multi pass Bloom, create 2 framebuffers with only 1 color attachment
+    // Multi pass Bloom for models, create 2 framebuffers with only 1 color attachment
     std::vector<int> attachments = { GL_RGBA16F };
-    app->bloomBuffer.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
-    app->bloomBuffer.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
+    app->bloomBufferModels.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
+    app->bloomBufferModels.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
     
+    // Multi pass Bloom for lights, create 2 framebuffers with only 1 color attachment
+    attachments = { GL_RGBA16F };
+    app->bloomBufferLights.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
+    app->bloomBufferLights.push_back(std::make_shared<FrameBuffer>(app->displaySize, attachments));
+
 
     // First pass framebuffer
     attachments = { GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F };
@@ -758,6 +763,7 @@ void Init(App* app)
     light8.type = LightType::LightType_Point;
     light8.position = glm::vec3(1.6f, -0.1f, 3.5f);
     light8.direction = glm::vec3(1.0f);
+    light8.intensity = glm::vec3(1.0f);
     light8.color = glm::vec3(0.25f, 0.75f, 1.0f);
     light8.model = LoadModel(app, "Primitives/sphere.fbx");
 
@@ -768,6 +774,7 @@ void Init(App* app)
     light9.type = LightType::LightType_Point;
     light9.position = glm::vec3(6.4f, 4.0f, -3.0f);
     light9.direction = glm::vec3(1.0f);
+    light9.intensity = glm::vec3(1.0f);
     light9.color = glm::vec3(0.5f, 0.5f, 0.0f);
     light9.model = LoadModel(app, "Primitives/sphere.fbx");
 
@@ -778,6 +785,7 @@ void Init(App* app)
     light10.type = LightType::LightType_Point;
     light10.position = glm::vec3(-2.8f, 0.0f, 2.0f);
     light10.direction = glm::vec3(1.0f);
+    light10.intensity = glm::vec3(1.0f);
     light10.color = glm::vec3(1.0f, 0.0f, 0.75f);
     light10.model = LoadModel(app, "Primitives/sphere.fbx");
 
@@ -788,13 +796,12 @@ void Init(App* app)
     light11.type = LightType::LightType_Point;
     light11.position = glm::vec3(2.8f, 0.0f, 2.0f);
     light11.direction = glm::vec3(1.0f);
+    light11.intensity = glm::vec3(1.0f);
     light11.color = glm::vec3(0.0f, 0.2f, 1.0f);
     light11.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
     app->lights.push_back(light11);
-
-
 
     // ------- Point Lights End -------
 
@@ -1250,26 +1257,8 @@ void Render(App* app)
             // First Pass end
 
             // Bloom pass **Accumulate blur**
-            bool horizontal = true, firstIteration = true;
-            int amount = 10;
-            Program& shaderBloom = app->programs[app->bloomShader];
-            glUseProgram(shaderBloom.handle);
-            glDisable(GL_DEPTH_TEST);
-            for (u32 i = 0; i < amount; ++i)
-            {
-                app->bloomBuffer[horizontal]->Bind();
-                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                app->uniformUploader.UploadUniformInt(shaderBloom, "horizontal", horizontal);
-                glBindTexture(GL_TEXTURE_2D, firstIteration ? app->framebuffer->colorAttachments[4] : app->bloomBuffer[!horizontal]->colorAttachments[0]);
-                DrawQuadVao(app);
-                horizontal = !horizontal;
-                if (firstIteration)
-                    firstIteration = false;
-
-                app->bloomBuffer[horizontal]->Unbind();
-            }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+           
+            app->modelBloomed = CalculateBloom(app, app->framebuffer->colorAttachments[4], app->bloomBufferModels);
 
             // Bloom pass End
 
@@ -1277,8 +1266,8 @@ void Render(App* app)
             app->QuadFramebuffer->Bind();
 
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_DEPTH_TEST);
 
             switch (app->shadingType)
             {
@@ -1458,7 +1447,7 @@ void DrawForwardRendering(App* app)
     u32 bloomUniformTexture = glGetUniformLocation(quadShader.handle, "bloomBlur");
     glUniform1i(bloomUniformTexture, 1);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, app->bloomBuffer[0]->colorAttachments[0]);
+    glBindTexture(GL_TEXTURE_2D, app->modelBloomed);
 }
 
 void DrawDeferredRendering(App* app)
@@ -1494,4 +1483,31 @@ void DrawDeferredRendering(App* app)
 
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[3]);
+}
+
+u32 CalculateBloom(App* app, u32 attachmentToBloom, std::vector<std::shared_ptr<FrameBuffer>> buffers)
+{
+    bool horizontal = true, firstIteration = true;
+    int amount = 10;
+    Program& shaderBloom = app->programs[app->bloomShader];
+    glUseProgram(shaderBloom.handle);
+    glDisable(GL_DEPTH_TEST);
+    for (u32 i = 0; i < amount; ++i)
+    {
+        buffers[horizontal]->Bind();
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        app->uniformUploader.UploadUniformInt(shaderBloom, "horizontal", horizontal);
+        glBindTexture(GL_TEXTURE_2D, firstIteration ? attachmentToBloom : buffers[!horizontal]->colorAttachments[0]);
+        DrawQuadVao(app);
+        horizontal = !horizontal;
+        if (firstIteration)
+            firstIteration = false;
+
+        buffers[horizontal]->Unbind();
+    }
+    glUseProgram(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return buffers[!horizontal]->colorAttachments[0];
 }

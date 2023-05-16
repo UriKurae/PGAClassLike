@@ -57,12 +57,12 @@ void main()
 		tone = pow(tone, vec3(1.0 / gamma));
   
 		oColor = vec4(tone, 1.0);
-		oColor += texture(bloomBlur, TexCoords);
+		//oColor += texture(bloomBlur, TexCoords);
 	 }
 	 else if (exposureActive == 0)
 	 {
 		oColor = texture(screenTexture, TexCoords);
-		oColor += texture(bloomBlur, TexCoords);
+		//oColor += texture(bloomBlur, TexCoords);
 	 }
 
 	 break;

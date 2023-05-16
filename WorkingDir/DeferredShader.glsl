@@ -34,6 +34,7 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
+	float intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
@@ -77,9 +78,10 @@ void main()
 		{
 			vec3 lightDir = normalize(uLight[i].direction);
 			
+			Normal = normalize(Normal);
 			// Diffuse light
 			float diff = max(dot(Normal, lightDir), 0.0);
-			vec3 diffuse = diff * uLight[i].color;
+			vec3 diffuse = diff * uLight[i].color * uLight[i].intensity;
 			
 			float ambientStrength = 0.1;
 			vec3 ambientLight = ambientStrength * uLight[i].color;
@@ -88,7 +90,7 @@ void main()
 			// Specular light
 			vec3 reflectDir = reflect(lightDir, Normal);
 			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
-			vec3 specularLight = 0.5 * spec * uLight[i].color;
+			vec3 specularLight = Specular * spec * uLight[i].color * uLight[i].intensity;
 			
 			
 			lighting += (ambientLight + diffuse + specularLight) * Diffuse;
@@ -99,13 +101,13 @@ void main()
 
 			vec3 lightDir = normalize(uLight[i].position - FragPos);
 			vec3 halfwayDir = normalize(lightDir + viewDir);
-			
-			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color;
+			Normal = normalize(Normal);
+			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color * uLight[i].intensity;
 	
 			// Specular light
 			vec3 reflectDir = reflect(-lightDir, Normal);
 			float spec = pow(max(dot(Normal, halfwayDir), 0.0), 128.0);
-			vec3 specularLight = 0.5 * spec * uLight[i].color;
+			vec3 specularLight = Specular * spec * uLight[i].color * uLight[i].intensity;
 			
 			float distance = length(uLight[i].position - FragPos);
 			float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance));
