@@ -671,7 +671,7 @@ void Init(App* app)
     light.type = LightType::LightType_Directional;
     light.position = glm::vec3(-10.0f, 5.0f, 0.0f);
     light.direction = glm::vec3(-1.0f, 1.0, 1.0f);
-    light.color = glm::vec3(1.0f, 1.0f, 0.0f);
+    light.color = glm::vec3(0.65f);
     light.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light);
@@ -680,7 +680,7 @@ void Init(App* app)
     light2.type = LightType::LightType_Directional;
     light2.position = glm::vec3(10.0f, 5.0f, 0.0f);
     light2.direction = glm::vec3(1.0f, 1.0f, 1.0f);
-    light2.color = glm::vec3(1.0f, 0.4f, 0.0f);
+    light2.color = glm::vec3(0.1f, 0.65f, 0.65f);
     light2.model = LoadModel(app, "Primitives/planeDirectionalLight.obj");
 
     app->lights.push_back(light2);
@@ -737,6 +737,47 @@ void Init(App* app)
 
 
     app->lights.push_back(light7);
+
+    Light light8;
+    light8.type = LightType::LightType_Point;
+    light8.position = glm::vec3(1.6f, -0.1f, 3.5f);
+    light8.direction = glm::vec3(1.0f);
+    light8.color = glm::vec3(0.25f, 0.75f, 1.0f);
+    light8.model = LoadModel(app, "Primitives/sphere.fbx");
+
+
+    app->lights.push_back(light8);
+
+    Light light9;
+    light9.type = LightType::LightType_Point;
+    light9.position = glm::vec3(6.4f, 4.0f, -3.0f);
+    light9.direction = glm::vec3(1.0f);
+    light9.color = glm::vec3(0.5f, 0.5f, 0.0f);
+    light9.model = LoadModel(app, "Primitives/sphere.fbx");
+
+
+    app->lights.push_back(light9);
+
+    Light light10;
+    light10.type = LightType::LightType_Point;
+    light10.position = glm::vec3(-2.8f, 0.0f, 2.0f);
+    light10.direction = glm::vec3(1.0f);
+    light10.color = glm::vec3(1.0f, 0.0f, 0.75f);
+    light10.model = LoadModel(app, "Primitives/sphere.fbx");
+
+
+    app->lights.push_back(light10);
+
+    Light light11;
+    light11.type = LightType::LightType_Point;
+    light11.position = glm::vec3(2.8f, 0.0f, 2.0f);
+    light11.direction = glm::vec3(1.0f);
+    light11.color = glm::vec3(0.0f, 0.2f, 1.0f);
+    light11.model = LoadModel(app, "Primitives/sphere.fbx");
+
+
+    app->lights.push_back(light11);
+
 
 
     // ------- Point Lights End -------
