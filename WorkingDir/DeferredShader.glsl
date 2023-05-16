@@ -34,7 +34,7 @@ struct Light
 	vec3 color;
 	vec3 direction;
 	vec3 position;
-	float intensity;
+	vec3 intensity;
 };
 
 layout(binding = 0, std140) uniform GlobalParams
