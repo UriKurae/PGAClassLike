@@ -70,25 +70,28 @@ void main()
 	// TODO: Base ambient light *Hardcoded for now, must pass uniform whenever!*
 	vec3 lighting = vec3(0.0);
 	vec3 viewDir = normalize(uCameraPosition - FragPos);
-
+	Normal = normalize(Normal);
 	for (int i = 0; i < uLightCount; ++i)
 	{
 		if (uLight[i].type == 0)
 		{
 			vec3 lightDir = normalize(uLight[i].direction);
 			
-			vec3 ambient = uLight[i].color * 0.1;
-
 			// Diffuse light
-			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color;
+			float diff = max(dot(Normal, lightDir), 0.0);
+			vec3 diffuse = diff * uLight[i].color;
 			
+			float ambientStrength = 0.1;
+			vec3 ambientLight = ambientStrength * uLight[i].color;
+
+
 			// Specular light
-			vec3 reflectDir = reflect(-lightDir, Normal);
+			vec3 reflectDir = reflect(lightDir, Normal);
 			float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
-			vec3 specularLight = Specular * spec * uLight[i].color;
+			vec3 specularLight = 0.5 * spec * uLight[i].color;
 			
 			
-			lighting += (ambient + diffuse + specularLight) * Diffuse;
+			lighting += (ambientLight + diffuse + specularLight) * Diffuse;
 		}
 		else if (uLight[i].type == 1)
 		{
@@ -96,14 +99,21 @@ void main()
 
 			vec3 lightDir = normalize(uLight[i].position - FragPos);
 			vec3 halfwayDir = normalize(lightDir + viewDir);
-
+			
 			vec3 diffuse = max(dot(Normal, lightDir), 0.0) * uLight[i].color;
 	
 			// Specular light
 			vec3 reflectDir = reflect(-lightDir, Normal);
 			float spec = pow(max(dot(Normal, halfwayDir), 0.0), 128.0);
-			vec3 specularLight = Specular * spec * uLight[i].color;
+			vec3 specularLight = 0.5 * spec * uLight[i].color;
 			
+			float distance = length(uLight[i].position - FragPos);
+			float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance));
+
+			ambient  *= attenuation; 
+			diffuse  *= attenuation;
+			specularLight *= attenuation;   
+
 			lighting += (ambient + diffuse + specularLight) * Diffuse;
 		}
 		

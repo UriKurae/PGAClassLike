@@ -146,6 +146,13 @@ vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection)
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 128.0);
 	vec3 specularLight = specularStrength * spec * pointLight.color * pointLight.intensity;
 
+	float distance = length(pointLight.position - vPosition);
+	float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance));
+
+	ambientLight *= attenuation; 
+	diffuse *= attenuation;
+	specularLight *= attenuation;   
+
 	return diffuse + ambientLight + specularLight;
 }
 
