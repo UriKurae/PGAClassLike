@@ -52,6 +52,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gPosition;
 uniform sampler2D gAlbedoSpec;
 
+uniform sampler2D bloomBlur;
 uniform float exposureLevel;
 uniform int exposureActive;
 
@@ -62,11 +63,6 @@ void main()
 	vec3 Normal = texture(gNormal, TexCoords).rgb;
 	vec3 Diffuse = texture(gAlbedoSpec, TexCoords).rgb;
 	float Specular = texture(gAlbedoSpec, TexCoords).a;
-
-	if (Normal == vec3(0.0))
-	{
-		discard;
-	}
 
 	// TODO: Base ambient light *Hardcoded for now, must pass uniform whenever!*
 	vec3 lighting = vec3(0.0);
@@ -121,22 +117,23 @@ void main()
 		
 	}
 	
-	vec3 finalColor = lighting;
 
 	if (exposureActive == 1)
 	{
 		const float gamma = 2.2;
-		vec3 hdrColor = finalColor.rgb;
+		vec3 hdrColor = lighting.rgb;
  
 		vec3 tone = vec3(1.0) - exp(-hdrColor * exposureLevel);
 		
 		tone = pow(tone, vec3(1.0 / gamma));
   
 		oColor = vec4(tone, 1.0);
+		oColor += texture(bloomBlur, TexCoords);
 	}
 	else if(exposureActive == 0)
 	{
 		oColor = vec4(lighting, 1.0);
+		oColor += texture(bloomBlur, TexCoords);
 	}
 }
 

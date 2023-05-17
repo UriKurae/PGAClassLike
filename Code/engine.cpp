@@ -1483,6 +1483,11 @@ void DrawDeferredRendering(App* app)
 
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, app->framebuffer->colorAttachments[3]);
+
+    u32 bloomUniformTexture = glGetUniformLocation(quadShader.handle, "bloomBlur");
+    glUniform1i(bloomUniformTexture, 4);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, app->modelBloomed);
 }
 
 u32 CalculateBloom(App* app, u32 attachmentToBloom, std::vector<std::shared_ptr<FrameBuffer>> buffers)
