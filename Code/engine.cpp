@@ -1250,6 +1250,37 @@ void Render(App* app)
             RenderModels(app, shaderModel);
             
             glUseProgram(0);
+
+            Program& lightShader = app->programs[app->lightShader];
+            glUseProgram(lightShader.handle);
+
+            app->uniformUploader.UploadUniformMat4(lightShader, "view", app->camera->GetView());
+            app->uniformUploader.UploadUniformMat4(lightShader, "projection", app->camera->GetProjection());
+
+            for (u32 i = 0; i < app->lights.size(); ++i)
+            {
+                Light& light = app->lights[i];
+                Model& model = app->models[light.model];
+                Mesh& mesh = app->meshes[model.meshIdx];
+
+                app->uniformUploader.UploadUniformMat4(lightShader, "model", light.GetTransformMat());
+                app->uniformUploader.UploadUniformFloat3(lightShader, "lightColor", light.color);
+                app->uniformUploader.UploadUniformFloat3(lightShader, "intensity", light.intensity);
+
+
+                for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+                {
+                    u32 vao = FindVao(mesh, j, lightShader);
+                    glBindVertexArray(vao);
+
+                    Submesh& submesh = mesh.submeshes[j];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                    glBindVertexArray(0);
+                }
+            }
+
+            glUseProgram(0);
+
             // ------ Model Render End ------
 
 
@@ -1286,26 +1317,26 @@ void Render(App* app)
 
             glUseProgram(0);  
             app->QuadFramebuffer->Unbind();
-            // Second Pass End
+            //// Second Pass End
            
-            // ------ Light Render ------
-            // Lights have to be rendered as normal colors, not affected by other lights
-            // So we have to render them in separate to not be affected in the deferred pass
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->framebuffer->rendererID);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->QuadFramebuffer->rendererID);
-            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-            app->QuadFramebuffer->Bind();
-            glEnable(GL_DEPTH_TEST);
+            //// ------ Light Render ------
+            //// Lights have to be rendered as normal colors, not affected by other lights
+            //// So we have to render them in separate to not be affected in the deferred pass
+            //glBindFramebuffer(GL_READ_FRAMEBUFFER, app->framebuffer->rendererID);
+            //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->QuadFramebuffer->rendererID);
+            //glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            //app->QuadFramebuffer->Bind();
+            //glEnable(GL_DEPTH_TEST);
 
-            Program& shaderLight = app->programs[app->lightShader];
-            glUseProgram(shaderLight.handle);
+            //Program& shaderLight = app->programs[app->lightShader];
+            //glUseProgram(shaderLight.handle);
 
-            RenderLights(app, shaderLight, app->activeLights);
+            //RenderLights(app, shaderLight, app->activeLights);
 
-            glUseProgram(0);
-            // ------ Light Render End ------
+            //glUseProgram(0);
+            //// ------ Light Render End ------
 
-            app->QuadFramebuffer->Unbind();
+            //app->QuadFramebuffer->Unbind();
         
         }
             break;

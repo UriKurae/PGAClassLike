@@ -28,12 +28,22 @@ void main()
 in vec2 vTexCoord;
 
 layout(location=0) out vec4 oColor;
+layout(location=1) out vec4 normal;
+layout(location=2) out vec4 position;
+layout(location=4) out vec4 brightColor;
 
 uniform vec3 lightColor;
+uniform vec3 intensity;
 
 void main()
 {
-	oColor = vec4(lightColor, 1.0);
+	oColor = vec4(lightColor * intensity, 1.0);
+
+	float brightness = dot(oColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 1.0)
+		brightColor = vec4(oColor.rgb, 1.0);
+	else
+		brightColor = vec4(0.0, 0.0,0.0,1.0);
 }
 
 #endif
