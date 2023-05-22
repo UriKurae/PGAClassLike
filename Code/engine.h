@@ -199,7 +199,14 @@ struct App
     u32 model;
     u32 modelShaderID;
     u32 modelShaderTextureUniformLocation;
+    u32 modelShaderNormalTextureUniformLocation;
+    u32 modelShaderDepthTextureUniformLocation;
     u32 modelTexture;
+    u32 modelNormalTexture;
+    u32 modelDepthTexture;
+
+    bool useNormal = true;
+    bool useDepth = true;
 
     // Uniforms helper
     BasicUniformUploader uniformUploader;

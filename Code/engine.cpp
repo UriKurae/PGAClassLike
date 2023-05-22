@@ -825,10 +825,15 @@ void Init(App* app)
     Program& shaderModel = app->programs[app->modelShaderID];
  
     // Load model texture and get texture ID from the vectors of textures.
-    app->modelTexture = LoadTexture2D(app, "Backpack/diffuse.jpg");
+    app->modelTexture = LoadTexture2D(app, "Patrick/bricks2.jpg");
+
+    // Load model texture and get texture ID from the vectors of textures.
+    app->modelNormalTexture = LoadTexture2D(app, "Patrick/bricks2_normal.jpg");
+    app->modelDepthTexture = LoadTexture2D(app, "Patrick/bricks2_disp.jpg");
 
     // Get uniform location from the texture for later use
     app->modelShaderTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "uTexture");
+    app->modelShaderNormalTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "normalMap");
     
     // End Mesh Program
 
@@ -918,6 +923,14 @@ void Gui(App* app)
             ImGui::Text("Debug Lights");
             ImGui::SameLine();
             ImGui::Checkbox("##Debug Lights", &app->activeLights);
+
+            ImGui::Text("Use Normal");
+            ImGui::SameLine();
+            ImGui::Checkbox("##Use Normal", &app->useNormal);
+
+            ImGui::Text("Use Height");
+            ImGui::SameLine();
+            ImGui::Checkbox("##Use Height", &app->useDepth);
 
             ImGui::EndMenu();
         }
@@ -1293,13 +1306,31 @@ void RenderModels(App* app, Program shaderModel)
             // This is for Backpack
             //GLuint textureHandle = app->textures[app->modelTexture].handle;
             // This for patrick
-            GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
+            //GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
+            
+            GLuint textureHandle = app->textures[app->modelTexture].handle;
             glBindTexture(GL_TEXTURE_2D, textureHandle);
+           
+            glUniform1i(app->modelShaderNormalTextureUniformLocation, 1);
+            glActiveTexture(GL_TEXTURE1);
+            textureHandle = app->textures[app->modelNormalTexture].handle;
+            glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+            glUniform1i(app->modelShaderDepthTextureUniformLocation, 2);
+            glActiveTexture(GL_TEXTURE2);
+            textureHandle = app->textures[app->modelDepthTexture].handle;
+            glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+            app->uniformUploader.UploadUniformFloat3(shaderModel, "viewPos", app->camera->GetPosition());
+            app->uniformUploader.UploadUniformInt(shaderModel, "useNormal", app->useNormal);
+            app->uniformUploader.UploadUniformInt(shaderModel, "useDepth", app->useDepth);
 
             Submesh& submesh = mesh.submeshes[j];
             glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
             glBindVertexArray(0);
         }
+
+       
     }
 }
 
