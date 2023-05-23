@@ -172,6 +172,7 @@ struct App
 
     ivec2 displaySize;
 
+
     // Forward and Deferred
     ShadingType shadingType;
 
@@ -208,7 +209,13 @@ struct App
     u32 model;
     u32 modelShaderID;
     u32 modelShaderTextureUniformLocation;
+    u32 reliefShaderID;
+    u32 modelShaderTextureReliefUniformLocation;
+    u32 modelShaderNormalTextureUniformLocation;
+    u32 modelShaderBumpTextureUniformLocation;
     u32 modelTexture;
+    u32 modelNormalTexture;
+    u32 modelBumpTexture;
 
     // Uniforms helper
     BasicUniformUploader uniformUploader;
@@ -275,7 +282,7 @@ void Update(App* app);
 
 void Render(App* app);
 
-void RenderModels(App* app, Program shaderModel);
+void RenderModels(App* app);
 void RenderLights(App* app, Program shaderModel, bool active);
 
 void GenerateQuadVao(App* app);

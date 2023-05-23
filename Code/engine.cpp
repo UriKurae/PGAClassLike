@@ -814,6 +814,7 @@ void Init(App* app)
     app->model = LoadModel(app, "Patrick/Patrick.obj");
     u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
+    u32 model4 = LoadModel(app, "Relief/plane.fbx");
     //app->model = LoadModel(app, "Backpack/backpack.obj");
     //u32 model2 = LoadModel(app, "Backpack/backpack.obj");
     //u32 model3 = LoadModel(app, "Backpack/backpack.obj");
@@ -821,10 +822,11 @@ void Init(App* app)
     
     
     Entity ent = {};
+    ent.PushEntity(app->model);
     ent.position = vec3(0.0f);
     ent.scale = vec3(1.0f);
     ent.rotation = vec3(0.0f);
-    ent.PushEntity(app->model);
+    ent.hasRelief = false;
     app->entities.push_back(ent);
 
     Entity ent2 = {};
@@ -832,6 +834,7 @@ void Init(App* app)
     ent2.position = vec3(6.0f, 0.0f, 0.0f);
     ent2.scale = vec3(1.0f);
     ent2.rotation = vec3(0.0f);
+    ent2.hasRelief = false;
     app->entities.push_back(ent2);
 
     Entity ent3 = {};
@@ -839,20 +842,39 @@ void Init(App* app)
     ent3.position = vec3(-6.0f, 0.0f, 0.0f);
     ent3.scale = vec3(1.0f);
     ent3.rotation = vec3(0.0f);
+    ent3.hasRelief = false;
     app->entities.push_back(ent3);
+
+    Entity ent4 = {};
+    ent4.PushEntity(model4);
+    ent4.position = vec3(0.0f, 6.0f, 0.0f);
+    ent4.scale = vec3(1.0f);
+    ent4.rotation = vec3(0.0f);
+    ent4.hasRelief = true;
+    app->entities.push_back(ent4);
 
     
     // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
-    // Get shader itself
-    Program& shaderModel = app->programs[app->modelShaderID];
+    app->reliefShaderID = LoadProgram(app, "reliefShader.glsl", "MESH_GEOMETRY_RELIEF");
+   
  
     // Load model texture and get texture ID from the vectors of textures.
-    app->modelTexture = LoadTexture2D(app, "Backpack/diffuse.jpg");
+    app->modelTexture = LoadTexture2D(app, "Relief/bricks2.jpg");
+    app->modelNormalTexture = LoadTexture2D(app, "Relief/bricks2_normal.jpg");
+    app->modelBumpTexture = LoadTexture2D(app, "Relief/bricks2_disp.jpg");
 
+    // Get shader itself
+    Program& shaderModel = app->programs[app->modelShaderID];
     // Get uniform location from the texture for later use
     app->modelShaderTextureUniformLocation = glGetUniformLocation(shaderModel.handle, "uTexture");
     
+    Program& shaderModelRelief = app->programs[app->reliefShaderID];
+    app->modelShaderTextureReliefUniformLocation = glGetUniformLocation(shaderModelRelief.handle, "uTexture");
+    app->modelShaderNormalTextureUniformLocation = glGetUniformLocation(shaderModelRelief.handle, "normalMap");
+    app->modelShaderBumpTextureUniformLocation = glGetUniformLocation(shaderModelRelief.handle, "depthMap");
+
+
     // End Mesh Program
 
     app->glInfo.glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -1241,15 +1263,8 @@ void Render(App* app)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // ------ Model Render ------
-            Program& shaderModel = app->programs[app->modelShaderID];
-            glUseProgram(shaderModel.handle);
 
-            u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
-            glUniform1i(renderModeUniform, (int)app->renderTarget);
-
-            RenderModels(app, shaderModel);
-            
-            glUseProgram(0);
+            RenderModels(app);
 
             Program& lightShader = app->programs[app->lightShader];
             glUseProgram(lightShader.handle);
@@ -1345,40 +1360,91 @@ void Render(App* app)
     }
 }
 
-void RenderModels(App* app, Program shaderModel)
+void RenderModels(App* app)
 {
+    
+
     // Bind buffer handle for lights
     glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
     for (u32 i = 0; i < app->entities.size(); ++i)
     {
-        // Bind buffer handle for models
-        glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformBuffer.handle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
-
-        Model& model = app->models[app->entities[i].modelIndex];
-        Mesh& mesh = app->meshes[model.meshIdx];
-
-        for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+        if (app->entities[i].hasRelief)
         {
-            u32 vao = FindVao(mesh, j, shaderModel);
-            glBindVertexArray(vao);
+            Program& shaderModel = app->programs[app->reliefShaderID];
+            glUseProgram(shaderModel.handle);
 
-            u32 submeshMaterialIdx = model.materialIdx[j];
-            Material& submeshMaterial = app->materials[submeshMaterialIdx];
+            u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
+            glUniform1i(renderModeUniform, (int)app->renderTarget);
+            // Bind buffer handle for models
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformBuffer.handle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
 
-            glUniform1i(app->modelShaderTextureUniformLocation, 0);
-            glActiveTexture(GL_TEXTURE0);
-            // This is for Backpack
-            //GLuint textureHandle = app->textures[app->modelTexture].handle;
-            // This for patrick
-            GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
-            glBindTexture(GL_TEXTURE_2D, textureHandle);
+            Model& model = app->models[app->entities[i].modelIndex];
+            Mesh& mesh = app->meshes[model.meshIdx];
 
-            Submesh& submesh = mesh.submeshes[j];
-            glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-            glBindVertexArray(0);
+            for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+            {
+                u32 vao = FindVao(mesh, j, shaderModel);
+                glBindVertexArray(vao);
+
+                u32 submeshMaterialIdx = model.materialIdx[j];
+                Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+                app->uniformUploader.UploadUniformFloat3(shaderModel, "viewPos", app->camera->GetPosition());
+                glUniform1i(app->modelShaderTextureReliefUniformLocation, 0);
+                glActiveTexture(GL_TEXTURE0);
+                GLuint textureHandle = app->textures[app->modelTexture].handle;
+                glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+                glUniform1i(app->modelShaderNormalTextureUniformLocation, 1);
+                glActiveTexture(GL_TEXTURE1);
+                textureHandle = app->textures[app->modelNormalTexture].handle;
+                glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+                glUniform1i(app->modelShaderBumpTextureUniformLocation, 2);
+                glActiveTexture(GL_TEXTURE2);
+                textureHandle = app->textures[app->modelBumpTexture].handle;
+                glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+                glActiveTexture(GL_TEXTURE0);
+                Submesh& submesh = mesh.submeshes[j];
+                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                glBindVertexArray(0);
+            }
+        }
+        else
+        {
+            Program& shaderModel = app->programs[app->modelShaderID];
+            glUseProgram(shaderModel.handle);
+
+            u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
+            glUniform1i(renderModeUniform, (int)app->renderTarget);
+            // Bind buffer handle for models
+            glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformBuffer.handle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
+
+            Model& model = app->models[app->entities[i].modelIndex];
+            Mesh& mesh = app->meshes[model.meshIdx];
+
+            for (u32 j = 0; j < mesh.submeshes.size(); ++j)
+            {
+                u32 vao = FindVao(mesh, j, shaderModel);
+                glBindVertexArray(vao);
+
+                u32 submeshMaterialIdx = model.materialIdx[j];
+                Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+                glUniform1i(app->modelShaderTextureUniformLocation, 0);
+                glActiveTexture(GL_TEXTURE0);
+                GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
+                glBindTexture(GL_TEXTURE_2D, textureHandle);
+               
+                Submesh& submesh = mesh.submeshes[j];
+                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                glBindVertexArray(0);
+            }
         }
     }
+    glUseProgram(0);
 }
 
 void RenderLights(App* app, Program shaderModel, bool active)
@@ -1534,6 +1600,7 @@ u32 CalculateBloom(App* app, u32 attachmentToBloom, std::vector<std::shared_ptr<
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         app->uniformUploader.UploadUniformInt(shaderBloom, "horizontal", horizontal);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, firstIteration ? attachmentToBloom : buffers[!horizontal]->colorAttachments[0]);
         DrawQuadVao(app);
         horizontal = !horizontal;

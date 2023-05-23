@@ -122,6 +122,14 @@ void OnGlfwResizeFramebuffer(GLFWwindow* window, int width, int height)
     app->camera->Recalculate(width, height);
     app->framebuffer->Resize({ width, height });
     app->QuadFramebuffer->Resize({ width, height });
+    for (int i = 0; i < app->bloomBufferLights.size(); ++i)
+    {
+        app->bloomBufferLights[i]->Resize({ width, height });
+    }
+    for (int i = 0; i < app->bloomBufferModels.size(); ++i)
+    {
+        app->bloomBufferModels[i]->Resize({ width, height });
+    }
 }
 
 void OnGlfwCloseWindow(GLFWwindow* window)
