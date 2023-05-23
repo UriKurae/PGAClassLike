@@ -847,8 +847,8 @@ void Init(App* app)
 
     Entity ent4 = {};
     ent4.PushEntity(model4);
-    ent4.position = vec3(0.0f, 6.0f, 0.0f);
-    ent4.scale = vec3(1.0f);
+    ent4.position = vec3(0.0f, 6.0f, -10.0f);
+    ent4.scale = vec3(20.0f, 20.0f, 1.0f);
     ent4.rotation = vec3(0.0f);
     ent4.hasRelief = true;
     app->entities.push_back(ent4);
@@ -950,6 +950,21 @@ void Gui(App* app)
             ImGui::Text("Activate Exposure");
             ImGui::SameLine();
             ImGui::Checkbox("##Activate Exposure", &app->exposureActive);
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Relief Options"))
+        {
+            ImGui::Text("Bumpiness");
+            ImGui::DragFloat("##Bumpiness", &app->bumpiness, 0.05f, -20.0f, 20.0f, "%.2f");
+
+            ImGui::Text("Min Layers");
+            ImGui::DragFloat("##Min Layers", &app->minLayers, 1.0f, 0.0f, 100.0f, "%.2f");
+
+            ImGui::Text("Max Layers");
+            ImGui::DragFloat("##Max Layers", &app->maxLayers, 1.0f, 0.0f, 100.0f, "%.2f");
+
 
             ImGui::EndMenu();
         }
@@ -1390,6 +1405,9 @@ void RenderModels(App* app)
                 u32 submeshMaterialIdx = model.materialIdx[j];
                 Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
+                app->uniformUploader.UploadUniformFloat(shaderModel, "bumpiness", app->bumpiness);
+                app->uniformUploader.UploadUniformFloat(shaderModel, "minLayers", app->minLayers);
+                app->uniformUploader.UploadUniformFloat(shaderModel, "maxLayers", app->maxLayers);
                 app->uniformUploader.UploadUniformFloat3(shaderModel, "viewPos", app->camera->GetPosition());
                 glUniform1i(app->modelShaderTextureReliefUniformLocation, 0);
                 glActiveTexture(GL_TEXTURE0);

@@ -120,5 +120,6 @@
     <None Include="WorkingDir\DeferredShader.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="WorkingDir\reliefShader.glsl" />
   </ItemGroup>
 </Project>

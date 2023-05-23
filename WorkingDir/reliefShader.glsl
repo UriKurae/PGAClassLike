@@ -74,6 +74,9 @@ uniform sampler2D uTexture;
 uniform sampler2D normalMap;
 uniform sampler2D depthMap;
 uniform int renderMode;
+uniform float bumpiness;
+uniform float minLayers;
+uniform float maxLayers;
 
 struct Light
 {
@@ -199,15 +202,12 @@ vec3 CalcPointLight(vec3 normal, Light pointLight, vec3 viewDirection)
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
-	const float minLayers = 8.0;
-	const float maxLayers = 32.0;
-
 	const float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
 	float layerDepth = 1.0 / numLayers;
 
 	float currentLayerDepth = 0.0;
 
-	vec2 P = viewDir.xy / viewDir.z * 0.1;
+	vec2 P = viewDir.xy / viewDir.z * bumpiness;
 	vec2 deltaTexCoords = P / numLayers;
 
 	vec2 currentTexCoords = texCoords;

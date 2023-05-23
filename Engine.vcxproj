@@ -58,6 +58,7 @@
     <None Include="WorkingDir\DeferredShader.glsl" />
     <None Include="WorkingDir\meshShader.glsl" />
     <None Include="WorkingDir\quadFrameBuffer.glsl" />
+    <None Include="WorkingDir\reliefShader.glsl" />
     <None Include="WorkingDir\shaders.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
