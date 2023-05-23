@@ -737,7 +737,7 @@ void Init(App* app)
 
     app->lights.push_back(light5);
 
-    Light light6;
+    /*Light light6;
     light6.type = LightType::LightType_Point;
     light6.position = glm::vec3(0.0f, 4.0f, -3.0f);
     light6.direction = glm::vec3(1.0f);
@@ -801,7 +801,7 @@ void Init(App* app)
     light11.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
-    app->lights.push_back(light11);
+    app->lights.push_back(light11);*/
 
     // ------- Point Lights End -------
 

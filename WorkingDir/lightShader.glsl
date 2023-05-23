@@ -42,7 +42,7 @@ void main()
 	specularColor = vec4(lightColor * intensity, 0.5);
 
 	float brightness = dot(oColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-	if (brightness > 1.0)
+	if (brightness > 0.5)
 		brightColor = vec4(oColor.rgb, 1.0);
 	else
 		brightColor = vec4(0.0, 0.0,0.0,1.0);
