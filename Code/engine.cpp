@@ -707,17 +707,17 @@ void Init(App* app)
     // ------- Point Lights -------
     Light light3;
     light3.type = LightType::LightType_Point;
-    light3.position = glm::vec3(0.0f, 0.0f, 2.0f);
+    light3.position = glm::vec3(0.5f, 5.3f, 3.7f);
     light3.direction = glm::vec3(1.0f);
     light3.color = glm::vec3(0.0f, 1.0f, 0.0f);
-    light3.intensity = glm::vec3(1.0f);
+    light3.intensity = glm::vec3(3.70f);
     light3.model = LoadModel(app, "Primitives/sphere.fbx");
 
     app->lights.push_back(light3);
 
     Light light4;
     light4.type = LightType::LightType_Point;
-    light4.position = glm::vec3(6.0f, 0.0f, 2.0f);
+    light4.position = glm::vec3(9.0f, 0.0f, 2.0f);
     light4.direction = glm::vec3(1.0f);
     light4.color = glm::vec3(0.0f, 0.0f, 1.0f);
     light4.intensity = glm::vec3(1.0f);
@@ -728,7 +728,7 @@ void Init(App* app)
 
     Light light5;
     light5.type = LightType::LightType_Point;
-    light5.position = glm::vec3(-6.0f, 0.0f, 2.0f);
+    light5.position = glm::vec3(-9.0f, 0.0f, 2.0f);
     light5.direction = glm::vec3(1.0f);
     light5.intensity = glm::vec3(1.0f);
     light5.color = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -758,18 +758,19 @@ void Init(App* app)
 
 
     app->lights.push_back(light7);
-    /*
+    
     Light light8;
     light8.type = LightType::LightType_Point;
-    light8.position = glm::vec3(1.6f, -0.1f, 3.5f);
+    light8.position = glm::vec3(1.8f, 5.9f, -2.1f);
     light8.direction = glm::vec3(1.0f);
-    light8.intensity = glm::vec3(1.0f);
-    light8.color = glm::vec3(0.25f, 0.75f, 1.0f);
+    light8.intensity = glm::vec3(3.80f);
+    light8.color = glm::vec3(0.1f, 0.65f, 0.65f);
     light8.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
     app->lights.push_back(light8);
 
+    /*
     Light light9;
     light9.type = LightType::LightType_Point;
     light9.position = glm::vec3(6.4f, 4.0f, -3.0f);
@@ -817,7 +818,6 @@ void Init(App* app)
    u32 wallNormal = LoadTexture2D(app, "Relief/Wall2/WallNormal.jpg");
    u32 wallHeight = LoadTexture2D(app, "Relief/Wall2/WallHeight.png");
 
-   u32 crystal = LoadTexture2D(app, "Crystal/textures/CrystalAlbedo.png");
 
     //
 
@@ -836,23 +836,9 @@ void Init(App* app)
   
     
     
-    Entity ent = {};
-    ent.PushEntity(app->model);
-    ent.position = vec3(0.0f);
-    ent.scale = vec3(1.0f);
-    ent.rotation = vec3(0.0f);
-    ent.hasRelief = false;
-    ent.textureIdx = -1;
-    ent.normalIdx = -1;
-    ent.bumpIdx = -1;
-    ent.bumpiness = -1.0f;
-    ent.minLayers = -1.0f;
-    ent.maxLayers = -1.0f;
-    app->entities.push_back(ent);
-
     Entity ent2 = {};
     ent2.PushEntity(model2);
-    ent2.position = vec3(6.0f, 0.0f, 0.0f);
+    ent2.position = vec3(9.0f, 0.0f, 0.0f);
     ent2.scale = vec3(1.0f);
     ent2.rotation = vec3(0.0f);
     ent2.hasRelief = false;
@@ -866,7 +852,7 @@ void Init(App* app)
 
     Entity ent3 = {};
     ent3.PushEntity(model3);
-    ent3.position = vec3(-6.0f, 0.0f, 0.0f);
+    ent3.position = vec3(-9.0f, 0.0f, 0.0f);
     ent3.scale = vec3(1.0f);
     ent3.rotation = vec3(0.0f);
     ent3.hasRelief = false;
@@ -908,11 +894,11 @@ void Init(App* app)
 
     Entity ent6 = {};
     ent6.PushEntity(model5);
-    ent6.position = vec3(23.9f, 6.0f, -10.0f);
-    ent6.scale = vec3(0.1f);
+    ent6.position = vec3(0.2f, -2.8f, 0.8f);
+    ent6.scale = vec3(4.0f);
     ent6.rotation = vec3(0.0f);
     ent6.hasRelief = false;
-    ent6.textureIdx = crystal;
+    ent6.textureIdx = -1;
     ent6.normalIdx = -1;
     ent6.bumpIdx = -1;
     ent6.bumpiness = -1;
@@ -1013,6 +999,19 @@ void Gui(App* app)
             ImGui::Text("Activate Exposure");
             ImGui::SameLine();
             ImGui::Checkbox("##Activate Exposure", &app->exposureActive);
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Bloom"))
+        {
+            ImGui::Text("Bloom Iterations");
+            ImGui::SameLine();
+            ImGui::DragInt("##Bloom Iterations", &app->bloomIterations, 1.0f, 0, 20);
+
+            ImGui::Separator();
+            ImGui::Text("Bloom Range");
+            ImGui::DragFloat("##Bloom Range", &app->bloomRange, 0.1f, 0.0f, 100.0f, "%.2f");
 
             ImGui::EndMenu();
         }
@@ -1347,35 +1346,7 @@ void Render(App* app)
 
             RenderModels(app);
 
-            Program& lightShader = app->programs[app->lightShader];
-            glUseProgram(lightShader.handle);
-
-            app->uniformUploader.UploadUniformMat4(lightShader, "view", app->camera->GetView());
-            app->uniformUploader.UploadUniformMat4(lightShader, "projection", app->camera->GetProjection());
-
-            for (u32 i = 0; i < app->lights.size(); ++i)
-            {
-                Light& light = app->lights[i];
-                Model& model = app->models[light.model];
-                Mesh& mesh = app->meshes[model.meshIdx];
-
-                app->uniformUploader.UploadUniformMat4(lightShader, "model", light.GetTransformMat());
-                app->uniformUploader.UploadUniformFloat3(lightShader, "lightColor", light.color);
-                app->uniformUploader.UploadUniformFloat3(lightShader, "intensity", light.intensity);
-
-
-                for (u32 j = 0; j < mesh.submeshes.size(); ++j)
-                {
-                    u32 vao = FindVao(mesh, j, lightShader);
-                    glBindVertexArray(vao);
-
-                    Submesh& submesh = mesh.submeshes[j];
-                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-                    glBindVertexArray(0);
-                }
-            }
-
-            glUseProgram(0);
+            RenderLights(app, app->activeLights);
 
             // ------ Model Render End ------
 
@@ -1423,8 +1394,6 @@ void Render(App* app)
 
 void RenderModels(App* app)
 {
-    
-
     // Bind buffer handle for lights
     glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(0), app->uniformBuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
@@ -1451,6 +1420,7 @@ void RenderModels(App* app)
                 u32 submeshMaterialIdx = model.materialIdx[j];
                 Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
+                app->uniformUploader.UploadUniformFloat(shaderModel, "bloomRange", app->bloomRange);
                 app->uniformUploader.UploadUniformFloat(shaderModel, "bumpiness", app->entities[i].bumpiness);
                 app->uniformUploader.UploadUniformFloat(shaderModel, "minLayers", app->entities[i].minLayers);
                 app->uniformUploader.UploadUniformFloat(shaderModel, "maxLayers", app->entities[i].maxLayers);
@@ -1483,6 +1453,9 @@ void RenderModels(App* app)
 
             u32 renderModeUniform = glGetUniformLocation(shaderModel.handle, "renderMode");
             glUniform1i(renderModeUniform, (int)app->renderTarget);
+
+            app->uniformUploader.UploadUniformFloat(shaderModel, "bloomRange", app->bloomRange);
+
             // Bind buffer handle for models
             glBindBufferRange(GL_UNIFORM_BUFFER, BINDING(1), app->uniformBuffer.handle, app->entities[i].localParamsOffset, app->entities[i].localParamsSize);
 
@@ -1501,6 +1474,11 @@ void RenderModels(App* app)
                 glActiveTexture(GL_TEXTURE0);
                 GLuint textureHandle = app->textures[submeshMaterial.albedoTextureIdx].handle;
                 glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+                glUniform1i(app->modelShaderNormalTextureUniformLocation, 1);
+                glActiveTexture(GL_TEXTURE1);
+                textureHandle = app->textures[submeshMaterial.normalsTextureIdx].handle;
+                glBindTexture(GL_TEXTURE_2D, textureHandle);
                
                 Submesh& submesh = mesh.submeshes[j];
                 glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
@@ -1511,12 +1489,15 @@ void RenderModels(App* app)
     glUseProgram(0);
 }
 
-void RenderLights(App* app, Program shaderModel, bool active)
+void RenderLights(App* app, bool active)
 {
     if (active)
     {
-        app->uniformUploader.UploadUniformMat4(shaderModel, "view", app->camera->GetView());
-        app->uniformUploader.UploadUniformMat4(shaderModel, "projection", app->camera->GetProjection());
+        Program& lightShader = app->programs[app->lightShader];
+        glUseProgram(lightShader.handle);
+
+        app->uniformUploader.UploadUniformMat4(lightShader, "view", app->camera->GetView());
+        app->uniformUploader.UploadUniformMat4(lightShader, "projection", app->camera->GetProjection());
 
         for (u32 i = 0; i < app->lights.size(); ++i)
         {
@@ -1524,13 +1505,14 @@ void RenderLights(App* app, Program shaderModel, bool active)
             Model& model = app->models[light.model];
             Mesh& mesh = app->meshes[model.meshIdx];
 
-            app->uniformUploader.UploadUniformMat4(shaderModel, "model", light.GetTransformMat());
-            app->uniformUploader.UploadUniformFloat3(shaderModel, "lightColor", light.color);
+            app->uniformUploader.UploadUniformMat4(lightShader, "model", light.GetTransformMat());
+            app->uniformUploader.UploadUniformFloat3(lightShader, "lightColor", light.color);
+            app->uniformUploader.UploadUniformFloat3(lightShader, "intensity", light.intensity);
 
 
             for (u32 j = 0; j < mesh.submeshes.size(); ++j)
             {
-                u32 vao = FindVao(mesh, j, shaderModel);
+                u32 vao = FindVao(mesh, j, lightShader);
                 glBindVertexArray(vao);
 
                 Submesh& submesh = mesh.submeshes[j];
@@ -1538,6 +1520,8 @@ void RenderLights(App* app, Program shaderModel, bool active)
                 glBindVertexArray(0);
             }
         }
+
+        glUseProgram(0);
     }
 }
 
@@ -1654,9 +1638,11 @@ void DrawDeferredRendering(App* app)
 u32 CalculateBloom(App* app, u32 attachmentToBloom, std::vector<std::shared_ptr<FrameBuffer>> buffers)
 {
     bool horizontal = true, firstIteration = true;
-    int amount = 10;
+    int amount = app->bloomIterations;
     Program& shaderBloom = app->programs[app->bloomShader];
     glUseProgram(shaderBloom.handle);
+    GLuint iterations = glGetUniformLocation(shaderBloom.handle, "iterations");
+    glUniform1i(iterations, amount);
     glDisable(GL_DEPTH_TEST);
     for (u32 i = 0; i < amount; ++i)
     {

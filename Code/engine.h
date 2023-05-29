@@ -231,6 +231,10 @@ struct App
     float exposureLevel = 0.1f;
     bool exposureActive = true;
 
+    // Bloom 
+    float bloomRange = 1.0f;
+    int bloomIterations = 10;
+
     // --------- Uniform buffers mesh Shader ---------
     // Uniform buffers size and alignment
     i32 maxUniformBufferSize;
@@ -284,7 +288,7 @@ void Update(App* app);
 void Render(App* app);
 
 void RenderModels(App* app);
-void RenderLights(App* app, Program shaderModel, bool active);
+void RenderLights(App* app, bool active);
 
 void GenerateQuadVao(App* app);
 

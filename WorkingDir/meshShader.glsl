@@ -41,6 +41,7 @@ in vec3 vPosition;
 
 uniform sampler2D uTexture;
 uniform int renderMode;
+uniform float bloomRange;
 
 struct Light
 {
@@ -95,7 +96,7 @@ void main()
 	albedoColor = vec4(finalLight, 1.0);
 
 	float brightness = dot(albedoColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-	if (brightness > 1.0)
+	if (brightness > bloomRange)
 		brightColor = vec4(albedoColor.rgb, 1.0);
 	else
 		brightColor = vec4(0.0, 0.0,0.0,1.0);

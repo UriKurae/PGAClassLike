@@ -3,7 +3,7 @@
 EditorCamera::EditorCamera(int w, int h, float near, float far)
 {
 	// Setup camera position, front and up
-	cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
+	cameraPos = glm::vec3(9.5f, 1.3f, 19.2f);
 	camFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
