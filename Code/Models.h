@@ -67,5 +67,14 @@ struct Entity
 	glm::vec3 rotation;
 	glm::vec3 scale;
 
+	u32 textureIdx;
+	u32 normalIdx;
+	u32 bumpIdx;
+
+	// Relief options
+	float bumpiness;
+	float minLayers;
+	float maxLayers;
+
 	bool hasRelief;
 };

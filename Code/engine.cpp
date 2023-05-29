@@ -737,12 +737,12 @@ void Init(App* app)
 
     app->lights.push_back(light5);
 
-    /*Light light6;
+    Light light6;
     light6.type = LightType::LightType_Point;
-    light6.position = glm::vec3(0.0f, 4.0f, -3.0f);
+    light6.position = glm::vec3(-29.5f, 4.0f, -4.8f);
     light6.direction = glm::vec3(1.0f);
-    light6.intensity = glm::vec3(1.0f);
-    light6.color = glm::vec3(1.0f, 0.0f, 1.0f);
+    light6.intensity = glm::vec3(5.0f);
+    light6.color = glm::vec3(1.0f, 0.0f, 0.0f);
     light6.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
@@ -750,15 +750,15 @@ void Init(App* app)
 
     Light light7;
     light7.type = LightType::LightType_Point;
-    light7.position = glm::vec3(-6.0f, 4.0f, -3.0f);
+    light7.position = glm::vec3(25.0f, 4.0f, -5.5f);
     light7.direction = glm::vec3(1.0f);
-    light7.intensity = glm::vec3(1.0f);
-    light7.color = glm::vec3(0.19f, 0.84f, 0.78f);
+    light7.intensity = glm::vec3(10.0f);
+    light7.color = glm::vec3(1.0f, 1.0f, 0.0f);
     light7.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
     app->lights.push_back(light7);
-
+    /*
     Light light8;
     light8.type = LightType::LightType_Point;
     light8.position = glm::vec3(1.6f, -0.1f, 3.5f);
@@ -807,6 +807,18 @@ void Init(App* app)
 
     // ------- End Lights -------
 
+    // Textures
+    // Load model texture and get texture ID from the vectors of textures.
+    app->modelTexture = LoadTexture2D(app, "Relief/bricks2.jpg");
+    app->modelNormalTexture = LoadTexture2D(app, "Relief/bricks2_normal.jpg");
+    app->modelBumpTexture = LoadTexture2D(app, "Relief/bricks2_disp.jpg");
+
+   u32 wallColor = LoadTexture2D(app, "Relief/Wall2/WallAlbedo.jpg");
+   u32 wallNormal = LoadTexture2D(app, "Relief/Wall2/WallNormal.jpg");
+   u32 wallHeight = LoadTexture2D(app, "Relief/Wall2/WallHeight.png");
+
+
+    //
 
     // Mesh Program
 
@@ -815,6 +827,8 @@ void Init(App* app)
     u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model4 = LoadModel(app, "Relief/plane.fbx");
+    u32 model5 = LoadModel(app, "Primitives/sphere.fbx");
+
     //app->model = LoadModel(app, "Backpack/backpack.obj");
     //u32 model2 = LoadModel(app, "Backpack/backpack.obj");
     //u32 model3 = LoadModel(app, "Backpack/backpack.obj");
@@ -827,6 +841,12 @@ void Init(App* app)
     ent.scale = vec3(1.0f);
     ent.rotation = vec3(0.0f);
     ent.hasRelief = false;
+    ent.textureIdx = -1;
+    ent.normalIdx = -1;
+    ent.bumpIdx = -1;
+    ent.bumpiness = -1.0f;
+    ent.minLayers = -1.0f;
+    ent.maxLayers = -1.0f;
     app->entities.push_back(ent);
 
     Entity ent2 = {};
@@ -835,6 +855,12 @@ void Init(App* app)
     ent2.scale = vec3(1.0f);
     ent2.rotation = vec3(0.0f);
     ent2.hasRelief = false;
+    ent2.textureIdx = -1;
+    ent2.normalIdx = -1;
+    ent2.bumpIdx = -1;
+    ent2.bumpiness = -1.0f;
+    ent2.minLayers = -1.0f;
+    ent2.maxLayers = -1.0f;
     app->entities.push_back(ent2);
 
     Entity ent3 = {};
@@ -843,26 +869,48 @@ void Init(App* app)
     ent3.scale = vec3(1.0f);
     ent3.rotation = vec3(0.0f);
     ent3.hasRelief = false;
+    ent3.textureIdx = -1;
+    ent3.normalIdx = -1;
+    ent3.bumpIdx = -1;
+    ent3.bumpiness = -1.0f;
+    ent3.minLayers = -1.0f;
+    ent3.maxLayers = -1.0f;
     app->entities.push_back(ent3);
-
+        
     Entity ent4 = {};
     ent4.PushEntity(model4);
-    ent4.position = vec3(0.0f, 6.0f, -10.0f);
+    ent4.position = vec3(-30.3f, 6.0f, -10.0f);
     ent4.scale = vec3(20.0f, 20.0f, 1.0f);
     ent4.rotation = vec3(0.0f);
     ent4.hasRelief = true;
+    ent4.textureIdx = app->modelTexture;
+    ent4.normalIdx = app->modelNormalTexture;
+    ent4.bumpIdx = app->modelBumpTexture;
+    ent4.bumpiness = 0.2f;
+    ent4.minLayers = 8.0f;
+    ent4.maxLayers = 32.0f;
     app->entities.push_back(ent4);
 
+    Entity ent5 = {};
+    ent5.PushEntity(model4);
+    ent5.position = vec3(23.9f, 6.0f, -10.0f);
+    ent5.scale = vec3(20.0f, 20.0f, 1.0f);
+    ent5.rotation = vec3(0.0f);
+    ent5.hasRelief = true;
+    ent5.textureIdx = wallColor;
+    ent5.normalIdx = wallNormal;
+    ent5.bumpIdx = wallHeight;
+    ent5.bumpiness = -0.2f;
+    ent5.minLayers = 8.0f;
+    ent5.maxLayers = 32.0f;
+    app->entities.push_back(ent5);
     
     // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
     app->reliefShaderID = LoadProgram(app, "reliefShader.glsl", "MESH_GEOMETRY_RELIEF");
    
  
-    // Load model texture and get texture ID from the vectors of textures.
-    app->modelTexture = LoadTexture2D(app, "Relief/bricks2.jpg");
-    app->modelNormalTexture = LoadTexture2D(app, "Relief/bricks2_normal.jpg");
-    app->modelBumpTexture = LoadTexture2D(app, "Relief/bricks2_disp.jpg");
+    
 
     // Get shader itself
     Program& shaderModel = app->programs[app->modelShaderID];
@@ -950,21 +998,6 @@ void Gui(App* app)
             ImGui::Text("Activate Exposure");
             ImGui::SameLine();
             ImGui::Checkbox("##Activate Exposure", &app->exposureActive);
-
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Relief Options"))
-        {
-            ImGui::Text("Bumpiness");
-            ImGui::DragFloat("##Bumpiness", &app->bumpiness, 0.05f, -20.0f, 20.0f, "%.2f");
-
-            ImGui::Text("Min Layers");
-            ImGui::DragFloat("##Min Layers", &app->minLayers, 1.0f, 0.0f, 100.0f, "%.2f");
-
-            ImGui::Text("Max Layers");
-            ImGui::DragFloat("##Max Layers", &app->maxLayers, 1.0f, 0.0f, 100.0f, "%.2f");
-
 
             ImGui::EndMenu();
         }
@@ -1071,10 +1104,29 @@ void Gui(App* app)
         ImGui::SameLine();
         ImGui::DragFloat("##scaleZ", &scale.z, 0.1f);
 
+        if (app->entities[i].hasRelief)
+        {
+            ImGui::Text("Relief Options");
+
+            ImGui::Text("Bumpiness");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Bumpiness", &app->entities[i].bumpiness, 0.05f, -20.0f, 100.0f, "%.2f");
+
+            ImGui::Text("Min Layers");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Min Layers", &app->entities[i].minLayers, 1.0f, 0.0f, 1000.0f, "%.2f");
+
+            ImGui::Text("Max Layers");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Max Layers", &app->entities[i].maxLayers, 1.0f, 0.0f, 1000.0f, "%.2f");
+
+        }
+
         ImGui::PopItemWidth();
 
         ImGui::Separator();
 
+        
 
         ImGui::PopID();
         
@@ -1405,23 +1457,23 @@ void RenderModels(App* app)
                 u32 submeshMaterialIdx = model.materialIdx[j];
                 Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-                app->uniformUploader.UploadUniformFloat(shaderModel, "bumpiness", app->bumpiness);
-                app->uniformUploader.UploadUniformFloat(shaderModel, "minLayers", app->minLayers);
-                app->uniformUploader.UploadUniformFloat(shaderModel, "maxLayers", app->maxLayers);
+                app->uniformUploader.UploadUniformFloat(shaderModel, "bumpiness", app->entities[i].bumpiness);
+                app->uniformUploader.UploadUniformFloat(shaderModel, "minLayers", app->entities[i].minLayers);
+                app->uniformUploader.UploadUniformFloat(shaderModel, "maxLayers", app->entities[i].maxLayers);
                 app->uniformUploader.UploadUniformFloat3(shaderModel, "viewPos", app->camera->GetPosition());
                 glUniform1i(app->modelShaderTextureReliefUniformLocation, 0);
                 glActiveTexture(GL_TEXTURE0);
-                GLuint textureHandle = app->textures[app->modelTexture].handle;
+                GLuint textureHandle = app->textures[app->entities[i].textureIdx].handle;
                 glBindTexture(GL_TEXTURE_2D, textureHandle);
 
                 glUniform1i(app->modelShaderNormalTextureUniformLocation, 1);
                 glActiveTexture(GL_TEXTURE1);
-                textureHandle = app->textures[app->modelNormalTexture].handle;
+                textureHandle = app->textures[app->entities[i].normalIdx].handle;
                 glBindTexture(GL_TEXTURE_2D, textureHandle);
 
                 glUniform1i(app->modelShaderBumpTextureUniformLocation, 2);
                 glActiveTexture(GL_TEXTURE2);
-                textureHandle = app->textures[app->modelBumpTexture].handle;
+                textureHandle = app->textures[app->entities[i].bumpIdx].handle;
                 glBindTexture(GL_TEXTURE_2D, textureHandle);
 
                 glActiveTexture(GL_TEXTURE0);

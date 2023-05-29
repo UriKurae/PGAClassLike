@@ -206,12 +206,6 @@ struct App
     std::vector<Program>  programs;
 
 
-    // Relief options
-    float bumpiness = 0.2f;
-    float minLayers = 8.0f;
-    float maxLayers = 32.0f;
-
-
     // Model test
     u32 model;
     u32 modelShaderID;
