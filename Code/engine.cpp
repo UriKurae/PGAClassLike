@@ -770,7 +770,7 @@ void Init(App* app)
 
     app->lights.push_back(light8);
 
-    /*
+    
     Light light9;
     light9.type = LightType::LightType_Point;
     light9.position = glm::vec3(6.4f, 4.0f, -3.0f);
@@ -802,7 +802,7 @@ void Init(App* app)
     light11.model = LoadModel(app, "Primitives/sphere.fbx");
 
 
-    app->lights.push_back(light11);*/
+    app->lights.push_back(light11);
 
     // ------- Point Lights End -------
 
@@ -828,12 +828,7 @@ void Init(App* app)
     u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model4 = LoadModel(app, "Relief/plane.fbx");
-    u32 model5 = LoadModel(app, "Barbaro/barbaraso.obj");
-
-    //app->model = LoadModel(app, "Backpack/backpack.obj");
-    //u32 model2 = LoadModel(app, "Backpack/backpack.obj");
-    //u32 model3 = LoadModel(app, "Backpack/backpack.obj");
-  
+    u32 model5 = LoadModel(app, "Barbaro/barbaraso.obj"); 
     
     
     Entity ent2 = {};
@@ -1005,13 +1000,23 @@ void Gui(App* app)
 
         if (ImGui::BeginMenu("Bloom"))
         {
+            if (ImGui::Checkbox("No iteration limits (Warning)", &app->surpassLimits))
+            {
+                if (!app->surpassLimits && app->bloomIterations > 20)
+                    app->bloomIterations = 20;
+            }
+
             ImGui::Text("Bloom Iterations");
             ImGui::SameLine();
-            ImGui::DragInt("##Bloom Iterations", &app->bloomIterations, 1.0f, 0, 20);
+            if (!app->surpassLimits)
+                ImGui::DragInt("##Bloom Iterations", &app->bloomIterations, 1.0f, 0, 20);
+            else
+                ImGui::DragInt("##Bloom Iterations", &app->bloomIterations, 1.0f, 0, 1000);
 
             ImGui::Separator();
             ImGui::Text("Bloom Range");
             ImGui::DragFloat("##Bloom Range", &app->bloomRange, 0.1f, 0.0f, 100.0f, "%.2f");
+            
 
             ImGui::EndMenu();
         }

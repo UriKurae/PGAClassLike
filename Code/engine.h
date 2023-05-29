@@ -234,6 +234,7 @@ struct App
     // Bloom 
     float bloomRange = 1.0f;
     int bloomIterations = 10;
+    bool surpassLimits = false;
 
     // --------- Uniform buffers mesh Shader ---------
     // Uniform buffers size and alignment
