@@ -144,7 +144,7 @@ void main()
 	else
 		brightColor = vec4(0.0, 0.0,0.0,1.0);
 
-	normalColor = vec4(vec3(normalize(vNormal)), 1.0);
+	normalColor = vec4(vec3(normalize(normal)), 1.0);
 
 	positionColor = vec4(vPosition, 1.0);
 
