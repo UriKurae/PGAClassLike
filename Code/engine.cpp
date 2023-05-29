@@ -817,6 +817,7 @@ void Init(App* app)
    u32 wallNormal = LoadTexture2D(app, "Relief/Wall2/WallNormal.jpg");
    u32 wallHeight = LoadTexture2D(app, "Relief/Wall2/WallHeight.png");
 
+   u32 crystal = LoadTexture2D(app, "Crystal/textures/CrystalAlbedo.png");
 
     //
 
@@ -827,7 +828,7 @@ void Init(App* app)
     u32 model2 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model3 = LoadModel(app, "Patrick/Patrick.obj");
     u32 model4 = LoadModel(app, "Relief/plane.fbx");
-    u32 model5 = LoadModel(app, "Primitives/sphere.fbx");
+    u32 model5 = LoadModel(app, "Barbaro/barbaraso.obj");
 
     //app->model = LoadModel(app, "Backpack/backpack.obj");
     //u32 model2 = LoadModel(app, "Backpack/backpack.obj");
@@ -904,6 +905,20 @@ void Init(App* app)
     ent5.minLayers = 8.0f;
     ent5.maxLayers = 32.0f;
     app->entities.push_back(ent5);
+
+    Entity ent6 = {};
+    ent6.PushEntity(model5);
+    ent6.position = vec3(23.9f, 6.0f, -10.0f);
+    ent6.scale = vec3(0.1f);
+    ent6.rotation = vec3(0.0f);
+    ent6.hasRelief = false;
+    ent6.textureIdx = crystal;
+    ent6.normalIdx = -1;
+    ent6.bumpIdx = -1;
+    ent6.bumpiness = -1;
+    ent6.minLayers = -1;
+    ent6.maxLayers = -1;
+    app->entities.push_back(ent6);
     
     // Load shader and get shader Id, but this Id is for the vector of shaders, it's not actually the renderer ID
     app->modelShaderID = LoadProgram(app, "meshShader.glsl", "MESH_GEOMETRY");
@@ -1239,7 +1254,6 @@ void Update(App* app)
         AlignHead(app->uniformBuffer, sizeof(vec4));
 
         Light& light = app->lights[i];
-        //ELOG("INTENSITY %f %f %f ", light.intensity.x, light.intensity.y, light.intensity.z);
         PushUInt(app->uniformBuffer, light.type);
         PushVec3(app->uniformBuffer, light.color);
         PushVec3(app->uniformBuffer, light.direction);
@@ -1399,27 +1413,7 @@ void Render(App* app)
 
             glUseProgram(0);  
             app->QuadFramebuffer->Unbind();
-            //// Second Pass End
-           
-            //// ------ Light Render ------
-            //// Lights have to be rendered as normal colors, not affected by other lights
-            //// So we have to render them in separate to not be affected in the deferred pass
-            //glBindFramebuffer(GL_READ_FRAMEBUFFER, app->framebuffer->rendererID);
-            //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, app->QuadFramebuffer->rendererID);
-            //glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-            //app->QuadFramebuffer->Bind();
-            //glEnable(GL_DEPTH_TEST);
-
-            //Program& shaderLight = app->programs[app->lightShader];
-            //glUseProgram(shaderLight.handle);
-
-            //RenderLights(app, shaderLight, app->activeLights);
-
-            //glUseProgram(0);
-            //// ------ Light Render End ------
-
-            //app->QuadFramebuffer->Unbind();
-        
+            //// Second Pass End        
         }
             break;
 

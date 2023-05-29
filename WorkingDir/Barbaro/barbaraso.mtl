@@ -1,0 +1,50 @@
+# Blender 3.5.1 MTL File: 'untitled.blend'
+# www.blender.org
+
+newmtl Body_Material.002
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Body_Material_Base_Color.png
+map_Ns Body_Material_Roughness.png
+map_refl Body_Material_Metallic.png
+map_Bump -bm 1.000000 Body_Material_Normal_OpenGL.png
+
+newmtl Gear_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 1
+map_Kd Gear_Material_Base_Color.png
+map_Ns Gear_Material_Roughness.png
+map_refl Gear_Material_Metallic.png
+map_Ke Gear_Material_Emissive.png
+map_d Gear_Material_Opacity.png
+map_Bump -bm 1.000000 Gear_Material_Normal_OpenGL.png
+
+newmtl Hair_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Hair_Material_Base_Color.png
+map_Ns Hair_Material_Metallic.png
+map_refl Hair_Material_Metallic.png
+map_Bump -bm 1.000000 Hair_Material_Normal_OpenGL.png
+
+newmtl Weapon_Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Weapon_Material_Base_Color.png
+map_Ns Weapon_Material_Roughness.png
+map_refl Weapon_Material_Emissive.png
+map_Ke Weapon_Material_Emissive.png
+map_Bump -bm 1.000000 Weapon_Material_Normal_OpenGL.png
