@@ -7,16 +7,17 @@ we had to choose between 2 techniques related to the subject, in my case, I've c
 
 The engine includes two ways of visualizing the scene: Forward and Deferred shading, as well as options to visualize the different images of the G-Buffer.
 
-<img src="https://github.com/UriKurae/PGAClassLike/" >
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/Forward_001.png" >
 
 ## Bloom
 
 The first technique we implemented is bloom, which makes excess of lighting to "Bleed" giving the illusion that it's brighter.
 
-This is how it looks with bloom
-<img src="https://github.com/UriKurae/PGAClassLike/" >
+This is how it looks with bloom (Exaggerated)
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/WithBloom_001.png" >
 
 And this is how it looks without bloom
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/WithoutBloom_001.png" >
 
 ## HDR 
 
@@ -24,9 +25,11 @@ Bloom can work without HDR, but we got a much better effect with HDR.
 
 This is the scene with HDR
 
-<img src="https://github.com/UriKurae/PGAClassLike/" >
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/WithHDR_001.png" >
 
-This is the scene without HDR
+This is the scene without HDR (Everything seems burned)
+
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/WithoutHDR_001.png" >
 
 ## Parallax
 
@@ -34,22 +37,26 @@ Parallax gives the illusion that there's extra geometry in a model when in reali
 
 Model without Parallax
 
-<img src="https://github.com/UriKurae/PGAClassLike/" >
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/Relief_002.png" >
 
 Model with Parallax
 
-<img src="https://github.com/UriKurae/PGAClassLike/" >
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/Relief_001.png" >
+
+## More pictures of the techniques
+
+All other pictures can be seen in [This link](https://github.com/UriKurae/PGAClassLike/tree/main/Pictures)
 
 ## Controls:
 
-Basic UI interface with ImGui straightforward. Can click all menus and numbers.
-W,A,S,D to move camera forward, back, left and right.
-E and Q to move camera up and down.
-Right click + W,A,S,D to move camera while controlling the rotation with the mouse.
-Alt + Left click to orbit around (0,0,0).
-Mouse wheel to go forward or back.
-Alt + middle mouse button to pan the camera.
-Holding shift will increase the camera movement.
+* Basic UI interface with ImGui straightforward. Can click all menus and numbers.
+* W,A,S,D to move camera forward, back, left and right.
+* E and Q to move camera up and down.
+* Right click + W,A,S,D to move camera while controlling the rotation with the mouse.
+* Alt + Left click to orbit around (0,0,0).
+* Mouse wheel to go forward or back.
+* Alt + middle mouse button to pan the camera.
+* Holding shift will increase the camera movement.
 
 ## Interface buttons:
 
