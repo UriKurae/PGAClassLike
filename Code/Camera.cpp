@@ -42,10 +42,13 @@ void EditorCamera::UpdateFov(float newFov)
 
 void EditorCamera::Recalculate(int w, int h)
 {
+	if (h <= 0)
+		return;
+
 	// Setup camera position, front and up
-	cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
-	camFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	//cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
+	//camFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	//camUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// Get view and projection matrix 
 	view = glm::lookAt(cameraPos, cameraPos + camFront, camUp);

@@ -236,6 +236,9 @@ void FrameBuffer::DrawAttachments(u32 count, u32 attachments[])
 
 void FrameBuffer::Resize(glm::vec2 newDisplaySize)
 {
+	if (newDisplaySize.x <= 0.0f || newDisplaySize.y <= 0.0f)
+		return;
+
 	DeleteFrameBuffers();
 	SetupFrameBuffer(newDisplaySize, fbSpecifications);
 }
