@@ -56,6 +56,14 @@ Model with Parallax
 
 <img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/Relief_001.png" >
 
+Model without Parallax
+
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/WithoutRelief_001.png" >
+
+Model with Parallax
+
+<img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/WithRelief_001.png" >
+
 * These are the options for Parallax:
 <img src="https://github.com/UriKurae/PGAClassLike/blob/main/Pictures/ReliefOptions_001.png" >
 
