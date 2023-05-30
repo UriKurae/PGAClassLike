@@ -49,14 +49,14 @@ All other pictures can be seen in [This link](https://github.com/UriKurae/PGACla
 
 ## Controls:
 
-Basic UI interface with ImGui straightforward. Can click all menus and numbers.
-W,A,S,D to move camera forward, back, left and right.
-E and Q to move camera up and down.
-Right click + W,A,S,D to move camera while controlling the rotation with the mouse.
-Alt + Left click to orbit around (0,0,0).
-Mouse wheel to go forward or back.
-Alt + middle mouse button to pan the camera.
-Holding shift will increase the camera movement.
+* Basic UI interface with ImGui straightforward. Can click all menus and numbers.
+* W,A,S,D to move camera forward, back, left and right.
+* E and Q to move camera up and down.
+* Right click + W,A,S,D to move camera while controlling the rotation with the mouse.
+* Alt + Left click to orbit around (0,0,0).
+* Mouse wheel to go forward or back.
+* Alt + middle mouse button to pan the camera.
+* Holding shift will increase the camera movement.
 
 ## Interface buttons:
 
